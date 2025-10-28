@@ -15,7 +15,7 @@ const CONFIG = {
     
     // GitHub Personal Access Token (gist 권한)
     // https://github.com/settings/tokens 에서 생성
-    GITHUB_TOKEN: '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',
+    GITHUB_TOKEN: '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',
     
     // Gist ID (생성한 Gist URL에서 마지막 부분)
     // 예: https://gist.github.com/username/abc123def456 → 'abc123def456'
