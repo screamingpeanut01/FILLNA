@@ -225,7 +225,13 @@ function setupEventListeners() {
         await loadAdminScreen();
     });
     
-    document.getElementById('resetAllBtn').addEventListener('click', handleResetAll);
+    const resetBtn = document.getElementById('resetAllBtn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', handleResetAll);
+        console.log('✅ 초기화 버튼 이벤트 연결됨');
+    } else {
+        console.error('❌ resetAllBtn을 찾을 수 없음');
+    }
     
     // 모달
     document.getElementById('modalCancelBtn').addEventListener('click', closeModal);
@@ -767,18 +773,23 @@ function closeAdminDetailModal() {
 
 // 모든 데이터 초기화
 async function handleResetAll() {
+    console.log('🗑️ handleResetAll 호출됨');
+    
     // 첫 번째 확인
     const confirm1 = window.confirm(
         '⚠️ 경고!\n\n' +
         '이 작업은 다음을 모두 삭제합니다:\n' +
-        '• 모든 참여자의 점수 (Gist)\n' +
+        '• 모든 참여자의 점수 (Firebase)\n' +
         '• 모든 사용자의 진행 상황 (localStorage)\n' +
         '• 모든 VIEW 데이터\n\n' +
         '이 작업은 되돌릴 수 없습니다!\n\n' +
         '정말 계속하시겠습니까?'
     );
     
-    if (!confirm1) return;
+    if (!confirm1) {
+        console.log('❌ 첫 번째 확인 취소됨');
+        return;
+    }
     
     // 두 번째 확인 (안전장치)
     const confirm2 = window.confirm(
@@ -787,16 +798,23 @@ async function handleResetAll() {
         '이 작업은 되돌릴 수 없습니다!'
     );
     
-    if (!confirm2) return;
+    if (!confirm2) {
+        console.log('❌ 두 번째 확인 취소됨');
+        return;
+    }
+    
+    console.log('✅ 확인 완료, 초기화 시작...');
     
     try {
         showLoading();
         
-        // 1. Gist의 모든 점수 삭제 (빈 배열로 초기화)
+        // 1. Firebase의 모든 점수 삭제 (빈 배열로 초기화)
+        console.log('🔥 Firebase 데이터 삭제 중...');
         await saveScoresToGist([]);
+        console.log('✅ Firebase 데이터 삭제 완료');
         
         // 2. localStorage의 모든 데이터 삭제
-        // 모든 키를 가져와서 관련 데이터 삭제
+        console.log('💾 localStorage 데이터 삭제 중...');
         const keysToRemove = [];
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
@@ -810,8 +828,11 @@ async function handleResetAll() {
             }
         }
         
+        console.log(`📋 삭제할 키 목록:`, keysToRemove);
+        
         // 삭제 실행
         keysToRemove.forEach(key => localStorage.removeItem(key));
+        console.log('✅ localStorage 데이터 삭제 완료');
         
         hideLoading();
         
@@ -819,17 +840,19 @@ async function handleResetAll() {
         alert(
             '✅ 초기화 완료!\n\n' +
             `삭제된 항목:\n` +
-            `• Gist의 모든 점수 데이터\n` +
+            `• Firebase의 모든 점수 데이터\n` +
             `• localStorage의 ${keysToRemove.length}개 항목\n\n` +
             '모든 데이터가 삭제되었습니다.'
         );
         
+        console.log('🔄 관리자 화면 새로고침 중...');
         // 관리자 화면 새로고침
         await loadAdminScreen();
+        console.log('✅ 초기화 완료!');
         
     } catch (error) {
         hideLoading();
-        console.error('초기화 오류:', error);
+        console.error('❌ 초기화 오류:', error);
         alert('❌ 초기화 중 오류가 발생했습니다:\n\n' + error.message);
     }
 }
