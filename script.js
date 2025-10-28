@@ -221,11 +221,6 @@ function setupEventListeners() {
     document.getElementById('newGameBtn').addEventListener('click', handleNewGame);
     
     // 관리자 화면 버튼
-    document.getElementById('downloadScoresBtn').addEventListener('click', async () => {
-        const allScores = await loadScoresFromGist();
-        downloadScoresCSV(allScores);
-    });
-    
     document.getElementById('refreshScoresBtn').addEventListener('click', async () => {
         await loadAdminScreen();
     });
@@ -340,18 +335,19 @@ function createUserView() {
     const shuffled = [...fullData].sort(() => Math.random() - 0.5);
     const sampled = shuffled.slice(0, 20);
     
-    // 2. NULLABLE 필드에 랜덤하게 10개 결측값 생성
-    const nullablePositions = [];
+    // 2. 각 레코드마다 NULLABLE 필드 중 랜덤하게 1개씩 결측값 생성 (총 20개)
+    const selectedMissing = [];
     
     sampled.forEach((row, rowIndex) => {
-        NULLABLE_FIELDS.forEach(field => {
-            nullablePositions.push({ rowIndex, field });
+        // 각 레코드에서 NULLABLE 필드 중 랜덤하게 1개 선택
+        const randomFieldIndex = Math.floor(Math.random() * NULLABLE_FIELDS.length);
+        const selectedField = NULLABLE_FIELDS[randomFieldIndex];
+        
+        selectedMissing.push({
+            rowIndex: rowIndex,
+            field: selectedField
         });
     });
-    
-    // 랜덤하게 10개 선택
-    const shuffledPositions = nullablePositions.sort(() => Math.random() - 0.5);
-    const selectedMissing = shuffledPositions.slice(0, 10);
     
     // 결측값 저장 (원본 값 백업)
     missingCells = selectedMissing.map(pos => ({
@@ -512,8 +508,8 @@ function saveUserInputs() {
 function handleSubmit() {
     const filledCount = Object.keys(userInputs).length;
     
-    if (filledCount < 10) {
-        const confirm = window.confirm(`아직 ${10 - filledCount}개의 결측값이 남았습니다. 그래도 제출하시겠습니까?`);
+    if (filledCount < 20) {
+        const confirm = window.confirm(`아직 ${20 - filledCount}개의 결측값이 남았습니다. 그래도 제출하시겠습니까?`);
         if (!confirm) return;
     }
     
@@ -556,7 +552,7 @@ async function gradeSubmission() {
         });
     });
     
-    const score = (correctCount / 10) * 100;
+    const score = (correctCount / 20) * 100;
     
     // 결과 저장
     await saveScore({
@@ -582,43 +578,10 @@ async function saveScore(scoreData) {
     // 새 점수 추가
     allScores.push(scoreData);
     
-    // Gist에 저장
+    // Firebase에 저장
     await saveScoresToGist(allScores);
-    
-    // CSV 파일 다운로드 준비
-    downloadScoresCSV(allScores);
 }
 
-// 점수 CSV 다운로드
-function downloadScoresCSV(scores) {
-    const headers = ['사용자ID', '이름', '기수', '점수', '정답수', '오답수', '제출시간'];
-    const rows = scores.map(s => [
-        s.userId,
-        s.name,
-        s.sNo,
-        s.score.toFixed(1),
-        s.correctCount,
-        s.wrongCount,
-        new Date(s.timestamp).toLocaleString('ko-KR')
-    ]);
-    
-    const csvContent = [
-        headers.join(','),
-        ...rows.map(row => row.join(','))
-    ].join('\n');
-    
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'scores.csv');
-    link.style.visibility = 'hidden';
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
 
 // 결과 화면 표시
 function showResultScreen(score, correctCount, wrongCount, results) {
