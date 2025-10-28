@@ -8,7 +8,30 @@ let userInputs = {};
 // NULLABLE 필드 정의
 const NULLABLE_FIELDS = ['MBTI', 'AGE', 'HT_CLSS', 'FV_SNGR', 'HTWN'];
 
-// ==================== Gist API 함수 ====================
+// ==================== Firebase 함수 ====================
+
+let db = null; // Firebase Database 참조
+
+// Firebase 초기화
+function initFirebase() {
+    if (!isFirebaseConfigured()) {
+        console.warn('Firebase가 설정되지 않아 localStorage를 사용합니다.');
+        return false;
+    }
+    
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(FIREBASE_CONFIG);
+        }
+        db = firebase.database();
+        console.log('✅ Firebase 초기화 완료');
+        return true;
+    } catch (error) {
+        console.error('Firebase 초기화 실패:', error);
+        alert('⚠️ Firebase 초기화 실패. 로컬 저장소만 사용합니다.\n\n' + error.message);
+        return false;
+    }
+}
 
 // 로딩 표시
 function showLoading() {
@@ -20,37 +43,26 @@ function hideLoading() {
     document.getElementById('loadingOverlay').classList.remove('active');
 }
 
-// Gist에서 점수 데이터 로드
+// Firebase에서 점수 데이터 로드
 async function loadScoresFromGist() {
-    if (!CONFIG.isConfigured()) {
-        console.warn('Gist가 설정되지 않아 localStorage를 사용합니다.');
+    if (!db) {
+        console.warn('Firebase가 초기화되지 않아 localStorage를 사용합니다.');
         return JSON.parse(localStorage.getItem('allScores') || '[]');
     }
     
     try {
         showLoading();
-        const response = await fetch(CONFIG.getGistUrl(), {
-            headers: {
-                'Authorization': `token ${CONFIG.GITHUB_TOKEN}`,
-                'Accept': 'application/vnd.github.v3+json'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`Gist 로드 실패: ${response.status}`);
-        }
-        
-        const gist = await response.json();
-        const content = gist.files[CONFIG.GIST_FILENAME]?.content || '[]';
-        const scores = JSON.parse(content);
+        const snapshot = await db.ref('scores').once('value');
+        const scores = snapshot.val() || [];
         
         // localStorage에도 백업
         localStorage.setItem('allScores', JSON.stringify(scores));
         
         hideLoading();
+        console.log('✅ Firebase에서 점수 로드 완료:', scores.length, '개');
         return scores;
     } catch (error) {
-        console.error('Gist 로드 오류:', error);
+        console.error('Firebase 로드 오류:', error);
         hideLoading();
         
         // 실패시 localStorage 사용
@@ -59,43 +71,25 @@ async function loadScoresFromGist() {
     }
 }
 
-// Gist에 점수 데이터 저장
+// Firebase에 점수 데이터 저장
 async function saveScoresToGist(scores) {
     // 먼저 localStorage에 저장
     localStorage.setItem('allScores', JSON.stringify(scores));
     
-    if (!CONFIG.isConfigured()) {
-        console.warn('Gist가 설정되지 않아 localStorage만 사용합니다.');
+    if (!db) {
+        console.warn('Firebase가 초기화되지 않아 localStorage만 사용합니다.');
         return true;
     }
     
     try {
         showLoading();
-        const response = await fetch(CONFIG.getGistUrl(), {
-            method: 'PATCH',
-            headers: {
-                'Authorization': `token ${CONFIG.GITHUB_TOKEN}`,
-                'Accept': 'application/vnd.github.v3+json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                files: {
-                    [CONFIG.GIST_FILENAME]: {
-                        content: JSON.stringify(scores, null, 2)
-                    }
-                }
-            })
-        });
-        
-        if (!response.ok) {
-            throw new Error(`Gist 저장 실패: ${response.status}`);
-        }
+        await db.ref('scores').set(scores);
         
         hideLoading();
-        console.log('✅ Gist에 점수 저장 완료');
+        console.log('✅ Firebase에 점수 저장 완료');
         return true;
     } catch (error) {
-        console.error('Gist 저장 오류:', error);
+        console.error('Firebase 저장 오류:', error);
         hideLoading();
         
         alert('⚠️ 온라인 저장 실패. 로컬에만 저장되었습니다.\n\n' + error.message);
@@ -105,6 +99,7 @@ async function saveScoresToGist(scores) {
 
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', async () => {
+    initFirebase(); // Firebase 초기화
     await loadCSVData();
     setupEventListeners();
     checkExistingUser();
