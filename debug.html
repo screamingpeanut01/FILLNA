@@ -41,7 +41,24 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
-    <script src="config.js"></script>
+    <!-- Firebase Config (inline) -->
+    <script>
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyBeBC3p6bLZV4I_DlMLfI32zmSh7nXhYrg",
+            authDomain: "fillna.firebaseapp.com",
+            databaseURL: "https://fillna-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "fillna",
+            storageBucket: "fillna.firebasestorage.app",
+            messagingSenderId: "661539314031",
+            appId: "1:661539314031:web:5708ac91cc13b50be5b09a",
+            measurementId: "G-D5KMEY1WW3"
+        };
+
+        function isFirebaseConfigured() {
+            return FIREBASE_CONFIG.apiKey !== 'YOUR_API_KEY';
+        }
+    </script>
+    
     <script>
         const checksDiv = document.getElementById('checks');
         const logsDiv = document.getElementById('logs');
