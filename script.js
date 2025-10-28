@@ -99,22 +99,44 @@ async function saveScoresToGist(scores) {
 
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', async () => {
-    initFirebase(); // Firebase 초기화
-    await loadCSVData();
-    setupEventListeners();
-    checkExistingUser();
+    console.log('🚀 페이지 로드 시작');
+    console.log('🔍 Firebase SDK 체크:', typeof firebase !== 'undefined' ? '✅ 로드됨' : '❌ 없음');
+    console.log('🔍 FIREBASE_CONFIG 체크:', typeof FIREBASE_CONFIG !== 'undefined' ? '✅ 있음' : '❌ 없음');
+    
+    try {
+        initFirebase(); // Firebase 초기화
+        await loadCSVData();
+        setupEventListeners();
+        checkExistingUser();
+        console.log('✅ 페이지 초기화 완료');
+    } catch (error) {
+        console.error('❌ 페이지 초기화 오류:', error);
+        alert('페이지 초기화 중 오류가 발생했습니다.\n\n' + error.message);
+    }
 });
 
 // CSV 데이터 로드
 async function loadCSVData() {
     try {
+        console.log('📂 CSV 로드 시작...');
         const response = await fetch('data.csv');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
         const csvText = await response.text();
+        console.log('📄 CSV 텍스트 길이:', csvText.length);
+        
         fullData = parseCSV(csvText);
-        console.log(`Loaded ${fullData.length} records`);
+        console.log(`✅ Loaded ${fullData.length} records`);
+        
+        if (fullData.length === 0) {
+            throw new Error('CSV 파일이 비어있습니다.');
+        }
     } catch (error) {
-        console.error('Error loading CSV:', error);
-        alert('데이터를 불러오는데 실패했습니다.');
+        console.error('❌ Error loading CSV:', error);
+        alert('❌ 데이터를 불러오는데 실패했습니다.\n\n' + error.message + '\n\n페이지를 새로고침해주세요.');
     }
 }
 
@@ -164,8 +186,16 @@ function parseCSVLine(line) {
 
 // 이벤트 리스너 설정
 function setupEventListeners() {
+    console.log('🎯 이벤트 리스너 설정 시작');
+    
     // 로그인
-    document.getElementById('loginBtn').addEventListener('click', handleLogin);
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', handleLogin);
+        console.log('✅ 로그인 버튼 이벤트 연결됨');
+    } else {
+        console.error('❌ loginBtn을 찾을 수 없음');
+    }
     document.getElementById('studentNo').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleLogin();
     });
@@ -238,11 +268,22 @@ function checkExistingUser() {
 
 // 로그인 처리
 function handleLogin() {
+    console.log('🔍 handleLogin 호출됨');
+    
     const sNo = document.getElementById('studentNo').value;
     const name = document.getElementById('studentName').value.trim();
     const errorDiv = document.getElementById('loginError');
     
+    console.log('입력값:', { sNo, name });
+    
     errorDiv.textContent = '';
+    
+    // CSV 데이터 로드 확인
+    if (!fullData || fullData.length === 0) {
+        errorDiv.textContent = '❌ 데이터 로드 중입니다. 잠시 후 다시 시도해주세요.';
+        console.error('fullData가 비어있음:', fullData);
+        return;
+    }
     
     if (!sNo || !name) {
         errorDiv.textContent = '기수와 이름을 모두 입력해주세요.';

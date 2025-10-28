@@ -12,35 +12,60 @@
 
 ## 🚀 GitHub Pages 배포 방법
 
-### 1. GitHub Personal Access Token 생성 (중요! ⭐)
+### 1. Firebase 프로젝트 생성 (중요! ⭐)
 **모든 기기에서 점수를 공유하려면 필수입니다!**
 
-1. GitHub 로그인 → https://github.com/settings/tokens
-2. **"Generate new token"** → **"Generate new token (classic)"** 클릭
-3. Note: `FILLNA Game Token` (아무 이름이나)
-4. Expiration: **No expiration** (또는 원하는 기간)
-5. **Scopes**: `gist` 체크박스만 체크 ✅
-6. 맨 아래 **"Generate token"** 클릭
-7. 생성된 토큰 **복사** (다시 볼 수 없으니 주의!)
+1. **Firebase Console 접속**: https://console.firebase.google.com/
+2. **"프로젝트 추가"** 클릭
+3. 프로젝트 이름 입력 (예: `fillna-game`)
+4. Google Analytics는 **선택 안 함** (필요 없음)
+5. **"프로젝트 만들기"** 클릭
 
-### 2. Gist 생성
-1. https://gist.github.com/ 접속
-2. **"Create new gist"** 클릭
-3. Filename: `fillna-scores.json`
-4. Content: `[]` (빈 배열만 입력)
-5. **"Create secret gist"** 클릭 (Public도 가능하지만 Secret 권장)
-6. URL에서 Gist ID 복사
-   - 예: `https://gist.github.com/username/`**`abc123def456`** → **`abc123def456`**가 Gist ID
+### 2. Realtime Database 생성
+1. 왼쪽 메뉴에서 **"Realtime Database"** 클릭
+2. **"데이터베이스 만들기"** 클릭
+3. 위치: **United States** (또는 가까운 지역 선택)
+4. **보안 규칙**: **"테스트 모드에서 시작"** 선택 ⚠️
+5. **"사용 설정"** 클릭
 
-### 3. config.js 파일 수정
-`config.js` 파일을 열어서 다음 두 줄을 수정:
+### 3. Firebase 웹 앱 등록
+1. 프로젝트 개요로 돌아가기
+2. **"웹 앱 추가"** (`</>` 아이콘) 클릭
+3. 앱 닉네임 입력 (예: `fillna-web`)
+4. Firebase Hosting은 **체크 안 함**
+5. **"앱 등록"** 클릭
+
+### 4. Firebase 구성 복사
+화면에 표시되는 **Firebase SDK 구성**을 복사:
 
 ```javascript
-GITHUB_TOKEN: 'ghp_your_actual_token_here',  // 1단계에서 복사한 토큰
-GIST_ID: 'abc123def456',  // 2단계에서 복사한 Gist ID
+const firebaseConfig = {
+  apiKey: "AIza...",
+  authDomain: "fillna-game.firebaseapp.com",
+  databaseURL: "https://fillna-game-default-rtdb.firebaseio.com",
+  projectId: "fillna-game",
+  storageBucket: "fillna-game.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abc123"
+};
 ```
 
-### 4. 저장소 생성 및 배포
+### 5. config.js 파일 수정
+`config.js` 파일을 열어서 Firebase 구성 값을 붙여넣기:
+
+```javascript
+const FIREBASE_CONFIG = {
+    apiKey: "여기에_복사한_apiKey",
+    authDomain: "여기에_복사한_authDomain",
+    databaseURL: "여기에_복사한_databaseURL",
+    projectId: "여기에_복사한_projectId",
+    storageBucket: "여기에_복사한_storageBucket",
+    messagingSenderId: "여기에_복사한_messagingSenderId",
+    appId: "여기에_복사한_appId"
+};
+```
+
+### 6. 저장소 생성 및 배포
 ```bash
 # 로컬에서 Git 초기화
 git init
@@ -53,16 +78,16 @@ git branch -M main
 git push -u origin main
 ```
 
-### 5. GitHub Pages 활성화
+### 7. GitHub Pages 활성화
 1. GitHub 저장소로 이동
 2. Settings → Pages
 3. Source를 "Deploy from a branch"로 설정
 4. Branch를 "main"으로 선택, 폴더는 "/ (root)" 선택
 5. Save 클릭
 
-### 6. 접속
+### 8. 접속
 - 몇 분 후 `https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/` 에서 게임에 접속할 수 있습니다
-- **이제 모든 참여자의 점수가 Gist에 저장되어 모든 기기에서 확인 가능합니다! 🎉**
+- **이제 모든 참여자의 점수가 Firebase에 저장되어 모든 기기에서 실시간으로 확인 가능합니다! 🎉**
 
 ## 📱 사용 방법
 
@@ -104,8 +129,8 @@ git push -u origin main
 ## 💾 데이터 저장
 
 ### 점수 데이터 (모든 기기 공유 🌐)
-- **저장 위치**: GitHub Gist (중앙 저장소)
-- **공유 범위**: 모든 참여자의 점수를 모든 기기에서 확인 가능
+- **저장 위치**: Firebase Realtime Database (클라우드 중앙 저장소)
+- **공유 범위**: 모든 참여자의 점수를 모든 기기에서 실시간 확인 가능
 - **백업**: localStorage에도 자동 백업
 
 ### 개인 진행 데이터 (기기별 독립)
@@ -116,7 +141,7 @@ git push -u origin main
 
 ### 데이터 흐름
 ```
-참여자 제출 → Gist에 점수 저장 → 관리자가 모든 기기에서 확인 가능
+참여자 제출 → Firebase에 점수 저장 → 관리자가 모든 기기에서 실시간 확인 가능
 ```
 
 ## 🗑️ 데이터 초기화 (관리자 전용)
@@ -130,14 +155,14 @@ git push -u origin main
 4. 2번의 확인 대화상자에서 **"확인"** 클릭
 
 ### 삭제되는 데이터
-- ✅ **Gist의 모든 점수** (모든 참여자의 제출 기록)
+- ✅ **Firebase의 모든 점수** (모든 참여자의 제출 기록)
 - ✅ **모든 사용자의 VIEW** (각자 받은 20개 레코드)
 - ✅ **모든 사용자의 입력값** (진행 중인 답변)
 - ✅ **localStorage의 모든 게임 데이터**
 
 ### 유지되는 데이터
 - ✅ **data.csv** (원본 60개 레코드는 그대로)
-- ✅ **config.js** (Gist 설정은 그대로)
+- ✅ **config.js** (Firebase 설정은 그대로)
 
 ### 주의사항
 - ⚠️ **이 작업은 되돌릴 수 없습니다!**
@@ -153,12 +178,12 @@ git push -u origin main
 ## 🛠️ 기술 스택
 
 - **Frontend**: HTML, CSS, JavaScript (순수 바닐라)
-- **데이터 공유**: GitHub Gist API (중앙 점수 저장소)
+- **데이터베이스**: Firebase Realtime Database (클라우드 중앙 저장소)
 - **로컬 저장**: localStorage (개인 진행 상황 & 백업)
 - **Hosting**: GitHub Pages (정적 사이트)
 - **데이터**: CSV 파일
 
-백엔드 서버 없이 Gist를 간단한 데이터베이스로 활용합니다!
+백엔드 서버 없이 Firebase를 간단한 클라우드 데이터베이스로 활용합니다!
 
 ## 📂 파일 구조
 
@@ -167,9 +192,10 @@ git push -u origin main
 ├── index.html          # 메인 HTML 파일
 ├── styles.css          # 스타일시트
 ├── script.js           # JavaScript 로직
-├── config.js           # 설정 파일 (Token, Gist ID)
+├── config.js           # Firebase 설정 파일
 ├── data.csv            # 원본 데이터 (60개 레코드)
-└── README.md           # 이 파일
+├── README.md           # 이 파일
+└── SETUP.md            # 빠른 시작 가이드
 ```
 
 ## 📝 실제 데이터 사용 시
@@ -189,33 +215,45 @@ git push
 ## 🔒 개인정보 보호
 
 ### 점수 데이터
-- GitHub Gist에 저장 (당신의 GitHub 계정 소유)
-- Gist는 Secret으로 설정하면 URL을 아는 사람만 접근 가능
-- 언제든지 Gist를 삭제하여 모든 점수 데이터 제거 가능
+- Firebase Realtime Database에 저장 (당신의 Firebase 프로젝트 소유)
+- Firebase 보안 규칙으로 접근 제어 가능
+- 언제든지 Firebase 프로젝트를 삭제하여 모든 데이터 제거 가능
 
 ### 개인 진행 데이터
 - 사용자의 브라우저 localStorage에만 저장
 - 외부로 전송되지 않음
 - localStorage를 지우면 삭제됨
 
-### Token 보안
-- ⚠️ GitHub Token은 `config.js`에 저장되므로 공개 저장소에 올릴 때 주의!
-- Token은 `gist` 권한만 가지므로 다른 리소스 접근 불가
-- 필요시 언제든지 Token 삭제 가능: https://github.com/settings/tokens
+### Firebase 보안
+- 📖 자세한 보안 규칙 설정: https://firebase.google.com/docs/database/security
+- 게임 종료 후 보안 규칙을 엄격하게 변경하거나 프로젝트 삭제 권장
+- Firebase API Key는 공개되어도 안전합니다 (보안 규칙이 실제 보안을 담당)
 
 ## 🐛 문제 해결
 
-### Gist 설정 관련
+### Firebase 설정 관련
 
-#### "⚠️ 온라인 데이터 로드 실패" 오류
-1. `config.js` 파일의 `GITHUB_TOKEN`과 `GIST_ID`가 올바른지 확인
-2. GitHub Token이 만료되지 않았는지 확인
-3. Gist가 삭제되지 않았는지 확인
+#### "⚠️ Firebase 초기화 실패" 오류
+1. `config.js` 파일의 Firebase 설정이 올바른지 확인
+2. Firebase Console에서 Realtime Database가 생성되었는지 확인
+3. `databaseURL`이 올바른지 확인
 4. 브라우저 콘솔(F12)에서 자세한 오류 메시지 확인
+
+#### "Permission denied" 오류
+1. Firebase Console → Realtime Database → 규칙 탭
+2. 다음과 같이 설정:
+```json
+{
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}
+```
 
 #### 관리자가 다른 참여자 점수를 못 봐요
 1. `config.js`가 올바르게 설정되었는지 확인
-2. Gist에 실제로 데이터가 저장되었는지 확인 (Gist URL 직접 방문)
+2. Firebase Console에서 데이터가 실제로 저장되었는지 확인
 3. 네트워크 연결 확인
 4. 🔄 새로고침 버튼 클릭
 
@@ -231,7 +269,7 @@ git push
 - 같은 브라우저를 사용하고 있는지 확인하세요
 - 시크릿 모드에서는 localStorage가 저장되지 않습니다
 
-#### Gist 없이 사용하고 싶어요
+#### Firebase 없이 사용하고 싶어요
 - `config.js`를 수정하지 않으면 자동으로 localStorage만 사용합니다
 - 단, 이 경우 **각 기기별로 점수가 독립적**으로 저장됩니다
 - 관리자는 자기 기기에서 제출된 점수만 볼 수 있습니다
@@ -243,4 +281,3 @@ git push
 ## 👥 기여
 
 버그 리포트나 기능 제안은 GitHub Issues를 통해 제출해주세요.
-

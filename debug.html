@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>디버그 페이지</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .check {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background: #1e3a1e;
+            color: #4caf50;
+        }
+        .error {
+            background: #3a1e1e;
+            color: #f44336;
+        }
+        pre {
+            background: #2d2d2d;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐛 FILLNA 게임 디버그</h1>
+    <div id="checks"></div>
+    <pre id="logs"></pre>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <script src="config.js"></script>
+    <script>
+        const checksDiv = document.getElementById('checks');
+        const logsDiv = document.getElementById('logs');
+        let logs = [];
+
+        function log(msg, isError = false) {
+            const timestamp = new Date().toLocaleTimeString();
+            logs.push(`[${timestamp}] ${msg}`);
+            logsDiv.textContent = logs.join('\n');
+            console.log(msg);
+        }
+
+        function check(name, condition, details = '') {
+            const div = document.createElement('div');
+            div.className = 'check ' + (condition ? 'success' : 'error');
+            div.innerHTML = `
+                ${condition ? '✅' : '❌'} ${name}
+                ${details ? `<br><small>${details}</small>` : ''}
+            `;
+            checksDiv.appendChild(div);
+            log(`${condition ? '✅' : '❌'} ${name} ${details}`);
+        }
+
+        async function runChecks() {
+            log('=== 디버그 시작 ===');
+
+            // 1. Firebase SDK 체크
+            check('Firebase SDK 로드', typeof firebase !== 'undefined');
+            
+            // 2. Config 체크
+            check('FIREBASE_CONFIG 존재', typeof FIREBASE_CONFIG !== 'undefined');
+            
+            if (typeof FIREBASE_CONFIG !== 'undefined') {
+                check('Firebase apiKey', FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey !== 'YOUR_API_KEY', 
+                    `apiKey: ${FIREBASE_CONFIG.apiKey.substring(0, 20)}...`);
+                check('Firebase databaseURL', FIREBASE_CONFIG.databaseURL && FIREBASE_CONFIG.databaseURL.includes('firebaseio.com'),
+                    `URL: ${FIREBASE_CONFIG.databaseURL}`);
+            }
+
+            // 3. Firebase 초기화
+            try {
+                if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+                    firebase.initializeApp(FIREBASE_CONFIG);
+                    const db = firebase.database();
+                    check('Firebase 초기화', true, 'Database 연결 성공');
+                    
+                    // 4. Firebase 읽기 테스트
+                    try {
+                        const snapshot = await db.ref('test').once('value');
+                        check('Firebase 읽기 테스트', true, `데이터: ${JSON.stringify(snapshot.val())}`);
+                    } catch (error) {
+                        check('Firebase 읽기 테스트', false, error.message);
+                    }
+                } else {
+                    check('Firebase 초기화', false, 'Firebase SDK 없음');
+                }
+            } catch (error) {
+                check('Firebase 초기화', false, error.message);
+            }
+
+            // 5. CSV 로드 테스트
+            try {
+                log('CSV 로드 시도...');
+                const response = await fetch('data.csv');
+                check('CSV fetch', response.ok, `Status: ${response.status}`);
+                
+                if (response.ok) {
+                    const text = await response.text();
+                    check('CSV 내용', text.length > 0, `크기: ${text.length} bytes`);
+                    
+                    const lines = text.trim().split('\n');
+                    check('CSV 레코드', lines.length > 1, `${lines.length} 줄 (헤더 포함)`);
+                }
+            } catch (error) {
+                check('CSV 로드', false, error.message);
+            }
+
+            // 6. DOM 요소 체크
+            check('loginBtn 요소', document.getElementById('loginBtn') !== null);
+            check('studentNo 요소', document.getElementById('studentNo') !== null);
+            check('studentName 요소', document.getElementById('studentName') !== null);
+
+            log('=== 디버그 완료 ===');
+        }
+
+        window.addEventListener('load', runChecks);
+    </script>
+</body>
+</html>
+
