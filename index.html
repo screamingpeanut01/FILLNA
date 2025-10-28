@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결측치를 채워라! - 메타 데이터 게임</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- 로딩 오버레이 -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>데이터 동기화 중...</p>
+    </div>
+    <!-- 로그인 화면 -->
+    <div id="loginScreen" class="screen active">
+        <div class="container">
+            <h1>🎮 결측치를 채워라!</h1>
+            <p class="subtitle">참여자 정보의 결측값을 직접 물어보며 채우는 게임</p>
+            
+            <div class="login-form">
+                <div class="form-group">
+                    <label for="studentNo">기수 (S_NO)</label>
+                    <input type="number" id="studentNo" min="1" max="20" placeholder="1-20" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="studentName">이름 (NAME)</label>
+                    <input type="text" id="studentName" placeholder="홍길동" required>
+                </div>
+                
+                <button id="loginBtn" class="btn btn-primary">게임 시작</button>
+            </div>
+            
+            <div id="loginError" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- 게임 화면 -->
+    <div id="gameScreen" class="screen">
+        <div class="header">
+            <div class="user-info">
+                <span id="currentUser"></span>
+            </div>
+            <button id="logoutBtn" class="btn btn-secondary">로그아웃</button>
+        </div>
+        
+        <div class="container">
+            <div class="game-info">
+                <h2>📊 결측치 채우기</h2>
+                <p>총 <strong id="totalMissing">10</strong>개의 결측값을 찾아 채워주세요!</p>
+                <p class="filled-count">채운 결측값: <strong id="filledCount">0</strong> / 10</p>
+            </div>
+            
+            <div class="table-container">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>NAME</th>
+                            <th>S_NO</th>
+                            <th>A_NO</th>
+                            <th>DEPT</th>
+                            <th>MBTI</th>
+                            <th>AGE</th>
+                            <th>HT_CLSS</th>
+                            <th>FV_SNGR</th>
+                            <th>STAFF_YN</th>
+                            <th>ELMT_SCHL</th>
+                            <th>HTWN</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody">
+                        <!-- 데이터가 여기에 렌더링됩니다 -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="saveBtn" class="btn btn-success">💾 저장</button>
+                <button id="submitBtn" class="btn btn-primary">✅ 제출 및 채점</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 결과 화면 -->
+    <div id="resultScreen" class="screen">
+        <div class="container">
+            <h1>📈 채점 결과</h1>
+            
+            <div class="score-card">
+                <div class="score-display">
+                    <div class="score-value" id="scoreValue">0</div>
+                    <div class="score-label">점수</div>
+                </div>
+                
+                <div class="score-details">
+                    <p>정답: <strong id="correctCount">0</strong> / 10</p>
+                    <p>오답: <strong id="wrongCount">0</strong> / 10</p>
+                    <p>정답률: <strong id="accuracyRate">0</strong>%</p>
+                </div>
+            </div>
+            
+            <div id="detailedResults" class="detailed-results">
+                <!-- 상세 결과가 여기에 표시됩니다 -->
+            </div>
+            
+            <div class="action-buttons">
+                <button id="backToGameBtn" class="btn btn-secondary">게임으로 돌아가기</button>
+                <button id="newGameBtn" class="btn btn-primary">새 게임 시작</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 관리자 화면 -->
+    <div id="adminScreen" class="screen">
+        <div class="header">
+            <div class="user-info">
+                <span>🔐 관리자 모드</span>
+            </div>
+            <button id="adminLogoutBtn" class="btn btn-secondary">로그아웃</button>
+        </div>
+        
+        <div class="container">
+            <div class="game-info">
+                <h2>📊 참여자 점수 현황</h2>
+                <p>총 <strong id="totalParticipants">0</strong>명이 제출했습니다</p>
+                <p class="admin-note">참여자를 클릭하면 상세 결과를 볼 수 있습니다</p>
+            </div>
+            
+            <div class="scores-container">
+                <table id="scoresTable">
+                    <thead>
+                        <tr>
+                            <th>순위</th>
+                            <th>이름</th>
+                            <th>기수</th>
+                            <th>점수</th>
+                            <th>정답/오답</th>
+                            <th>제출시간</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scoresTableBody">
+                        <!-- 점수 데이터가 여기에 렌더링됩니다 -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="downloadScoresBtn" class="btn btn-success">📥 점수 다운로드 (CSV)</button>
+                <button id="refreshScoresBtn" class="btn btn-primary">🔄 새로고침</button>
+            </div>
+            
+            <div class="admin-danger-zone">
+                <h3>⚠️ 위험 구역</h3>
+                <p>아래 기능은 되돌릴 수 없습니다. 신중하게 사용하세요.</p>
+                <button id="resetAllBtn" class="btn btn-danger">🗑️ 모든 데이터 초기화</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 모달 (결측값 입력용) -->
+    <div id="inputModal" class="modal">
+        <div class="modal-content">
+            <h3>결측값 입력</h3>
+            <p><strong id="modalFieldName"></strong></p>
+            <p class="modal-person">대상: <span id="modalPersonName"></span></p>
+            
+            <div class="form-group">
+                <input type="text" id="modalInput" placeholder="값을 입력하세요">
+            </div>
+            
+            <div class="modal-buttons">
+                <button id="modalCancelBtn" class="btn btn-secondary">취소</button>
+                <button id="modalConfirmBtn" class="btn btn-primary">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 모달 (관리자 상세 결과) -->
+    <div id="adminDetailModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="adminModalTitle">참여자 상세 결과</h3>
+                <button id="adminModalClose" class="close-btn">✕</button>
+            </div>
+            
+            <div class="admin-detail-info">
+                <p><strong>이름:</strong> <span id="adminDetailName"></span></p>
+                <p><strong>기수:</strong> <span id="adminDetailSNo"></span></p>
+                <p><strong>점수:</strong> <span id="adminDetailScore"></span>점</p>
+                <p><strong>정답률:</strong> <span id="adminDetailAccuracy"></span>%</p>
+                <p><strong>제출시간:</strong> <span id="adminDetailTime"></span></p>
+            </div>
+            
+            <div id="adminDetailResults" class="detailed-results">
+                <!-- 상세 결과가 여기에 표시됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
+
