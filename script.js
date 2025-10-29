@@ -6,8 +6,8 @@ let userView = null;
 let missingCells = [];
 let userInputs = {};
 
-// 모든 필드 (NAME과 S_NO 제외, 모두 결측 가능)
-const ALL_FIELDS = ['A_NO', 'DEPT', 'MBTI', 'AGE', 'HT_CLSS', 'FV_SNGR', 'STAFF_YN', 'ELMT_SCHL', 'HTWN'];
+// 모든 필드 (모두 결측 가능)
+const ALL_FIELDS = ['NAME', 'S_NO', 'A_NO', 'DEPT', 'MBTI', 'AGE', 'HT_CLSS', 'FV_SNGR', 'STAFF_YN', 'ELMT_SCHL', 'HTWN'];
 
 // ==================== Firebase 함수 ====================
 
@@ -471,7 +471,7 @@ function renderTable() {
             const td = document.createElement('td');
             const value = row[field];
             
-            if (value === null || value === '') {
+            if (value === null || value === '' || value === undefined) {
                 // 결측 셀
                 td.classList.add('missing-cell');
                 const cellId = `${rowIndex}_${field}`;
@@ -480,6 +480,9 @@ function renderTable() {
                 if (userInputs[cellId]) {
                     td.textContent = userInputs[cellId];
                     td.classList.add('filled');
+                } else {
+                    // 입력되지 않은 결측값은 &nbsp;로 공간 확보
+                    td.innerHTML = '&nbsp;';
                 }
                 
                 td.addEventListener('click', () => openInputModal(rowIndex, field));
@@ -500,18 +503,53 @@ function openInputModal(rowIndex, field) {
     const fieldName = document.getElementById('modalFieldName');
     const personName = document.getElementById('modalPersonName');
     const input = document.getElementById('modalInput');
+    const modalHint = document.getElementById('modalHint');
     
     // 필드 이름 한글화
     const fieldNames = {
+        'NAME': '이름',
+        'S_NO': '기수',
+        'A_NO': '번호',
+        'DEPT': '전공',
         'MBTI': 'MBTI 성격유형',
         'AGE': '나이',
         'HT_CLSS': '가장 수강하기 싫었던 과목',
         'FV_SNGR': '가장 좋아하는 가수',
+        'STAFF_YN': '운영진 여부',
+        'ELMT_SCHL': '출신 초등학교',
         'HTWN': '고향'
     };
     
+    // 필드별 데이터 타입과 예시
+    const fieldHints = {
+        'NAME': { type: '문자열', example: '예: 김민수, 이지은' },
+        'S_NO': { type: '숫자', example: '예: 1, 2, 3, ..., 20' },
+        'A_NO': { type: '숫자', example: '예: 1, 2, 3, ..., 30' },
+        'DEPT': { type: '문자열', example: '예: 컴퓨터공학, 경영학, 전자공학' },
+        'MBTI': { type: '문자열 (4글자)', example: '예: INTJ, ENFP, ISTP' },
+        'AGE': { type: '숫자', example: '예: 21, 22, 23, 24, 25' },
+        'HT_CLSS': { type: '문자열', example: '예: 미적분학, 통계학, 물리학' },
+        'FV_SNGR': { type: '문자열', example: '예: 아이유, BTS, 뉴진스' },
+        'STAFF_YN': { type: '불린', example: '예: true 또는 false' },
+        'ELMT_SCHL': { type: '문자열', example: '예: 서울초등학교, 부산초등학교' },
+        'HTWN': { type: '문자열', example: '예: 서울, 부산, 대구' }
+    };
+    
     fieldName.textContent = fieldNames[field] || field;
-    personName.textContent = userView[rowIndex]['NAME'];
+    
+    // 데이터 타입과 예시 표시
+    const hint = fieldHints[field];
+    if (hint && modalHint) {
+        modalHint.innerHTML = `
+            <strong>타입:</strong> ${hint.type}<br>
+            <small>${hint.example}</small>
+        `;
+        modalHint.style.display = 'block';
+    }
+    
+    // NAME이 결측인 경우 행 번호로 표시
+    const nameValue = userView[rowIndex]['NAME'];
+    personName.textContent = nameValue || `${rowIndex + 1}번째 레코드`;
     
     const cellId = `${rowIndex}_${field}`;
     input.value = userInputs[cellId] || '';
@@ -677,16 +715,22 @@ function showResultScreen(score, correctCount, wrongCount, results) {
         div.className = `result-item ${result.isCorrect ? 'correct' : 'wrong'}`;
         
         const fieldNames = {
+            'NAME': '이름',
+            'S_NO': '기수',
+            'A_NO': '번호',
+            'DEPT': '전공',
             'MBTI': 'MBTI',
             'AGE': '나이',
             'HT_CLSS': '싫었던 과목',
             'FV_SNGR': '좋아하는 가수',
+            'STAFF_YN': '운영진',
+            'ELMT_SCHL': '초등학교',
             'HTWN': '고향'
         };
         
         div.innerHTML = `
             <div class="result-info">
-                <strong>${result.name}</strong> - ${fieldNames[result.field]}<br>
+                <strong>${result.name || '(이름 결측)'}</strong> - ${fieldNames[result.field] || result.field}<br>
                 <small>입력: ${result.userAnswer} | 정답: ${result.correctAnswer}</small>
             </div>
             <span class="result-badge ${result.isCorrect ? 'correct' : 'wrong'}">
@@ -881,10 +925,16 @@ function showAdminDetail(scoreData) {
     detailedResults.innerHTML = '<h4 style="margin-bottom: 15px;">문항별 상세 결과</h4>';
     
     const fieldNames = {
+        'NAME': '이름',
+        'S_NO': '기수',
+        'A_NO': '번호',
+        'DEPT': '전공',
         'MBTI': 'MBTI',
         'AGE': '나이',
         'HT_CLSS': '싫었던 과목',
         'FV_SNGR': '좋아하는 가수',
+        'STAFF_YN': '운영진',
+        'ELMT_SCHL': '초등학교',
         'HTWN': '고향'
     };
     
@@ -894,7 +944,7 @@ function showAdminDetail(scoreData) {
         
         div.innerHTML = `
             <div class="result-info">
-                <strong>${index + 1}. ${result.name}</strong> - ${fieldNames[result.field]}<br>
+                <strong>${index + 1}. ${result.name || '(이름 결측)'}</strong> - ${fieldNames[result.field] || result.field}<br>
                 <small>입력: <strong>${result.userAnswer}</strong> | 정답: <strong>${result.correctAnswer}</strong></small>
             </div>
             <span class="result-badge ${result.isCorrect ? 'correct' : 'wrong'}">
