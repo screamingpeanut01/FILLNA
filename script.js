@@ -685,14 +685,43 @@ async function gradeSubmission() {
 
 // 점수 저장
 async function saveScore(scoreData) {
-    // 기존 점수 불러오기 (Gist에서)
+    console.log('💾 점수 저장 시작:', scoreData.userId, scoreData.score);
+    
+    // 기존 점수 불러오기
     const allScores = await loadScoresFromGist();
     
-    // 새 점수 추가
-    allScores.push(scoreData);
+    // 동일 userId(기수-이름)의 기존 제출 찾기
+    const existingIndex = allScores.findIndex(s => s.userId === scoreData.userId);
     
-    // Firebase에 저장
-    await saveScoresToGist(allScores);
+    if (existingIndex !== -1) {
+        // 기존 제출이 있는 경우
+        const existingScore = allScores[existingIndex];
+        console.log(`📊 기존 점수 발견: ${existingScore.score}점 → 새 점수: ${scoreData.score}점`);
+        
+        if (scoreData.score > existingScore.score) {
+            // 새 점수가 더 높으면 교체
+            allScores[existingIndex] = scoreData;
+            console.log(`✅ 점수 업데이트! ${existingScore.score}점 → ${scoreData.score}점`);
+            
+            // Firebase에 저장
+            await saveScoresToGist(allScores);
+            
+            alert(`🎉 최고 점수 갱신!\n\n이전 점수: ${existingScore.score.toFixed(1)}점\n새 점수: ${scoreData.score.toFixed(1)}점\n\n축하합니다!`);
+        } else {
+            // 새 점수가 더 낮거나 같으면 저장하지 않음
+            console.log(`⚠️ 기존 점수가 더 높음. 저장하지 않음. (기존: ${existingScore.score}점 vs 새로운: ${scoreData.score}점)`);
+            alert(`ℹ️ 이전 기록이 더 높습니다.\n\n이전 최고 점수: ${existingScore.score.toFixed(1)}점\n이번 점수: ${scoreData.score.toFixed(1)}점\n\n최고 점수는 ${existingScore.score.toFixed(1)}점으로 유지됩니다.`);
+        }
+    } else {
+        // 첫 제출인 경우
+        console.log('✨ 첫 제출! 점수 추가');
+        allScores.push(scoreData);
+        
+        // Firebase에 저장
+        await saveScoresToGist(allScores);
+        
+        alert(`✅ 첫 제출 완료!\n\n점수: ${scoreData.score.toFixed(1)}점\n\n수고하셨습니다!`);
+    }
 }
 
 
