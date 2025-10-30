@@ -259,7 +259,7 @@ function setupEventListeners() {
         showScreen('gameScreen');
     });
     
-    document.getElementById('newGameBtn').addEventListener('click', handleNewGame);
+    document.getElementById('resultLogoutBtn').addEventListener('click', handleLogout);
     
     // 관리자 화면 버튼
     document.getElementById('refreshScoresBtn').addEventListener('click', async () => {
@@ -484,8 +484,8 @@ function renderTable() {
                     td.classList.add('filled');
                     td.setAttribute('aria-label', `Filled: ${userInputs[cellId]}`);
                 } else {
-                    // 입력되지 않은 결측값 - 명확한 플레이스홀더 추가
-                    td.innerHTML = '<span class="placeholder-text">❓ 클릭하여 입력</span>';
+                    // 입력되지 않은 결측값 - ❓만 표시
+                    td.innerHTML = '<span class="placeholder-text">❓</span>';
                     td.setAttribute('data-clickable', 'true');
                     td.setAttribute('data-cell-id', cellId);
                     td.setAttribute('data-field', field);
@@ -529,29 +529,77 @@ function openInputModal(rowIndex, field) {
         'HTWN': '고향'
     };
     
-    // 필드별 데이터 타입과 예시
+    // 필드별 데이터 타입, 예시, 입력 규칙
     const fieldHints = {
-        'NAME': { type: '문자열', example: '예: 김민수, 이지은' },
-        'S_NO': { type: '숫자', example: '예: 1, 2, 3, ..., 20' },
-        'A_NO': { type: '숫자', example: '예: 1, 2, 3, ..., 30' },
-        'DEPT': { type: '문자열', example: '예: 컴퓨터공학, 경영학, 전자공학' },
-        'MBTI': { type: '문자열 (4글자)', example: '예: INTJ, ENFP, ISTP' },
-        'AGE': { type: '숫자', example: '예: 21, 22, 23, 24, 25' },
-        'HT_CLSS': { type: '문자열', example: '예: 미적분학, 통계학, 물리학' },
-        'FV_SNGR': { type: '문자열', example: '예: 아이유, BTS, 뉴진스' },
-        'STAFF_YN': { type: '불린', example: '예: true 또는 false' },
-        'ELMT_SCHL': { type: '문자열', example: '예: 서울초등학교, 부산초등학교' },
-        'HTWN': { type: '문자열', example: '예: 서울, 부산, 대구' }
+        'NAME': { 
+            type: '문자열', 
+            example: '예: 김민수, 이지은',
+            rule: '대소문자/띄어쓰기 구분 없음'
+        },
+        'S_NO': { 
+            type: '숫자', 
+            example: '예: 1, 2, 3, ..., 20',
+            rule: '숫자만 입력 (1-20)'
+        },
+        'A_NO': { 
+            type: '숫자', 
+            example: '예: 1, 2, 3, ..., 30',
+            rule: '숫자만 입력 (1-30)'
+        },
+        'DEPT': { 
+            type: '문자열', 
+            example: '예: 컴퓨터공학, 경영학',
+            rule: '띄어쓰기/특수문자 관대'
+        },
+        'MBTI': { 
+            type: '문자열 (4글자)', 
+            example: '예: INTJ, ENFP, ISTP',
+            rule: '대소문자 구분 없음, 공백 무시'
+        },
+        'AGE': { 
+            type: '숫자', 
+            example: '예: 21, 22, 23, 24, 25',
+            rule: '숫자만 입력'
+        },
+        'HT_CLSS': { 
+            type: '문자열', 
+            example: '예: 미적분학, 통계학',
+            rule: '띄어쓰기/특수문자 관대'
+        },
+        'FV_SNGR': { 
+            type: '문자열', 
+            example: '예: 아이유, BTS, 뉴진스',
+            rule: '띄어쓰기/특수문자 관대, 오타 1-2개 허용'
+        },
+        'STAFF_YN': { 
+            type: '불린', 
+            example: '예: true/false, 예/아니오',
+            rule: 'true/false, yes/no, y/n, 예/아니오 모두 가능'
+        },
+        'ELMT_SCHL': { 
+            type: '문자열', 
+            example: '예: 서울초등학교',
+            rule: '띄어쓰기/특수문자 관대'
+        },
+        'HTWN': { 
+            type: '문자열', 
+            example: '예: 서울, 부산, 대구',
+            rule: '띄어쓰기/특수문자 관대'
+        }
     };
     
     fieldName.textContent = fieldNames[field] || field;
     
-    // 데이터 타입과 예시 표시
+    // 데이터 타입, 예시, 규칙 표시
     const hint = fieldHints[field];
     if (hint && modalHint) {
         modalHint.innerHTML = `
-            <strong>타입:</strong> ${hint.type}<br>
-            <small>${hint.example}</small>
+            <div style="margin-bottom: 8px;">
+                <strong>📝 입력 규칙:</strong> <span style="color: #059669;">${hint.rule}</span>
+            </div>
+            <div style="font-size: 0.9rem; color: #6b7280;">
+                ${hint.example}
+            </div>
         `;
         modalHint.style.display = 'block';
     }
@@ -631,6 +679,111 @@ function handleSubmit() {
     gradeSubmission();
 }
 
+// Levenshtein Distance (편집 거리) 계산
+function levenshteinDistance(str1, str2) {
+    const len1 = str1.length;
+    const len2 = str2.length;
+    const matrix = [];
+
+    for (let i = 0; i <= len1; i++) {
+        matrix[i] = [i];
+    }
+
+    for (let j = 0; j <= len2; j++) {
+        matrix[0][j] = j;
+    }
+
+    for (let i = 1; i <= len1; i++) {
+        for (let j = 1; j <= len2; j++) {
+            if (str1[i - 1] === str2[j - 1]) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1, // 교체
+                    matrix[i][j - 1] + 1,     // 삽입
+                    matrix[i - 1][j] + 1      // 삭제
+                );
+            }
+        }
+    }
+
+    return matrix[len1][len2];
+}
+
+// 유사도 계산 (0-100%)
+function calculateSimilarity(str1, str2) {
+    const maxLen = Math.max(str1.length, str2.length);
+    if (maxLen === 0) return 100;
+    const distance = levenshteinDistance(str1, str2);
+    return ((maxLen - distance) / maxLen) * 100;
+}
+
+// 답안 정규화
+function normalizeAnswer(answer, field) {
+    if (!answer) return '';
+    
+    let normalized = answer.toString().trim();
+    
+    // 필드별 특수 처리
+    switch(field) {
+        case 'MBTI':
+            // 대문자 변환, 공백 제거
+            return normalized.toUpperCase().replace(/\s+/g, '');
+            
+        case 'AGE':
+        case 'S_NO':
+        case 'A_NO':
+            // 숫자만 추출
+            return normalized.replace(/\D/g, '');
+            
+        case 'STAFF_YN':
+            // boolean 처리
+            normalized = normalized.toLowerCase();
+            if (['true', 'yes', 'y', '예', 'o', '참'].includes(normalized)) return 'true';
+            if (['false', 'no', 'n', '아니오', 'x', '거짓'].includes(normalized)) return 'false';
+            return normalized;
+            
+        default:
+            // 기본: 소문자 변환, 여러 공백을 하나로, 특수문자 일부 제거
+            return normalized
+                .toLowerCase()
+                .replace(/\s+/g, ' ')
+                .replace(/[-.()]/g, '')
+                .trim();
+    }
+}
+
+// 답안 비교 (정규화 + 유사도)
+function compareAnswers(userAnswer, correctAnswer, field) {
+    if (!userAnswer || !correctAnswer) return false;
+    
+    // 1단계: 정규화
+    const normalizedUser = normalizeAnswer(userAnswer, field);
+    const normalizedCorrect = normalizeAnswer(correctAnswer, field);
+    
+    // 2단계: 정확히 일치
+    if (normalizedUser === normalizedCorrect) {
+        return true;
+    }
+    
+    // 3단계: 유사도 매칭 (85% 이상)
+    // 숫자 필드는 유사도 적용 안함 (정확해야 함)
+    if (['AGE', 'S_NO', 'A_NO'].includes(field)) {
+        return false;
+    }
+    
+    // boolean 필드도 유사도 적용 안함
+    if (field === 'STAFF_YN') {
+        return false;
+    }
+    
+    // 문자열 필드: 85% 이상 유사하면 정답
+    const similarity = calculateSimilarity(normalizedUser, normalizedCorrect);
+    console.log(`📊 유사도: "${userAnswer}" vs "${correctAnswer}" = ${similarity.toFixed(1)}%`);
+    
+    return similarity >= 85;
+}
+
 // 채점
 async function gradeSubmission() {
     let correctCount = 0;
@@ -642,15 +795,8 @@ async function gradeSubmission() {
         const userAnswer = userInputs[cellId];
         const correctAnswer = cell.originalValue;
         
-        let isCorrect = false;
-        
-        if (userAnswer) {
-            // 대소문자 무시, 공백 제거 후 비교
-            const normalizedUser = userAnswer.toString().trim().toLowerCase();
-            const normalizedCorrect = correctAnswer.toString().trim().toLowerCase();
-            
-            isCorrect = normalizedUser === normalizedCorrect;
-        }
+        // 새로운 비교 함수 사용 (정규화 + 유사도)
+        const isCorrect = userAnswer && compareAnswers(userAnswer, correctAnswer, cell.field);
         
         if (isCorrect) {
             correctCount++;
@@ -780,25 +926,6 @@ function showResultScreen(score, correctCount, wrongCount, results) {
     });
     
     showScreen('resultScreen');
-}
-
-// 새 게임 시작
-function handleNewGame() {
-    const confirm = window.confirm('새 게임을 시작하면 현재 진행상황이 모두 초기화됩니다. 계속하시겠습니까?');
-    if (!confirm) return;
-    
-    // 사용자 데이터 삭제
-    localStorage.removeItem(`userView_${currentUser.userId}`);
-    localStorage.removeItem(`userInputs_${currentUser.userId}`);
-    localStorage.removeItem(`missingCells_${currentUser.userId}`);
-    
-    // 새 VIEW 생성
-    createUserView();
-    userInputs = {};
-    saveUserView();
-    
-    // 게임 화면으로
-    showGameScreen();
 }
 
 // 로그아웃
