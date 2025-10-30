@@ -796,7 +796,7 @@ async function gradeSubmission() {
         const correctAnswer = cell.originalValue;
         
         // 새로운 비교 함수 사용 (정규화 + 유사도)
-        const isCorrect = userAnswer && compareAnswers(userAnswer, correctAnswer, cell.field);
+        const isCorrect = !!(userAnswer && compareAnswers(userAnswer, correctAnswer, cell.field));
         
         if (isCorrect) {
             correctCount++;
