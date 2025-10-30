@@ -278,23 +278,21 @@ tr:hover {
     cursor: pointer;
     position: relative;
     min-height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    min-width: 80px;
+    text-align: center;
+    vertical-align: middle;
     font-weight: 600;
+    padding: 12px 8px !important;
 }
 
 .missing-cell:hover {
     background-color: #fde68a !important;
 }
 
-.missing-cell::before {
+.missing-cell:not(.filled)::before {
     content: '❓';
     font-size: 1.2rem;
-}
-
-.missing-cell.filled::before {
-    content: '';
+    display: inline-block;
 }
 
 .missing-cell.filled {
@@ -431,7 +429,25 @@ tr:hover {
 
 .modal-person {
     color: var(--text-secondary);
-    margin-bottom: 20px;
+    margin-bottom: 15px;
+}
+
+.modal-hint {
+    background-color: #f0f9ff;
+    border-left: 4px solid var(--primary-color);
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.modal-hint strong {
+    color: var(--primary-color);
+}
+
+.modal-hint small {
+    color: var(--text-secondary);
 }
 
 .modal-buttons {

@@ -1,12 +1,13 @@
 // 전역 변수
 let fullData = [];
+let teamsData = [];
 let currentUser = null;
 let userView = null;
 let missingCells = [];
 let userInputs = {};
 
-// NULLABLE 필드 정의
-const NULLABLE_FIELDS = ['MBTI', 'AGE', 'HT_CLSS', 'FV_SNGR', 'HTWN'];
+// 모든 필드 (모두 결측 가능)
+const ALL_FIELDS = ['NAME', 'S_NO', 'A_NO', 'DEPT', 'MBTI', 'AGE', 'HT_CLSS', 'FV_SNGR', 'STAFF_YN', 'ELMT_SCHL', 'HTWN'];
 
 // ==================== Firebase 함수 ====================
 
@@ -106,6 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         initFirebase(); // Firebase 초기화
         await loadCSVData();
+        await loadTeamsData();
         setupEventListeners();
         checkExistingUser();
         console.log('✅ 페이지 초기화 완료');
@@ -138,6 +140,45 @@ async function loadCSVData() {
         console.error('❌ Error loading CSV:', error);
         alert('❌ 데이터를 불러오는데 실패했습니다.\n\n' + error.message + '\n\n페이지를 새로고침해주세요.');
     }
+}
+
+// Teams 데이터 로드
+async function loadTeamsData() {
+    try {
+        console.log('📂 Teams 로드 시작...');
+        const response = await fetch('teams.json');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const teamsJson = await response.json();
+        teamsData = teamsJson.teams;
+        console.log(`✅ Loaded ${teamsData.length} teams`);
+        
+        if (teamsData.length === 0) {
+            throw new Error('teams.json 파일이 비어있습니다.');
+        }
+    } catch (error) {
+        console.error('❌ Error loading teams:', error);
+        alert('❌ 팀 데이터를 불러오는데 실패했습니다.\n\n' + error.message + '\n\n페이지를 새로고침해주세요.');
+    }
+}
+
+// 사용자의 팀 찾기
+function findUserTeam(name) {
+    for (let team of teamsData) {
+        const member = team.members.find(m => m.name === name);
+        if (member) {
+            return team;
+        }
+    }
+    return null;
+}
+
+// 팀원 이름 목록 가져오기
+function getTeamMemberNames(team) {
+    return team.members.map(m => m.name);
 }
 
 // CSV 파싱 함수
@@ -296,8 +337,8 @@ function handleLogin() {
         return;
     }
     
-    // 관리자 체크: 기수 6, 이름 "김권택"
-    if (sNo == 6 && name === '김권택') {
+    // 관리자 체크: 기수 4, 이름 "김권택"
+    if (sNo == 4 && name === '김권택') {
         currentUser = { sNo, name, userId: 'admin', isAdmin: true };
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
         loadAdminScreen();
@@ -337,34 +378,49 @@ function loadUserData() {
 
 // 사용자 VIEW 생성
 function createUserView() {
-    // 1. 60개 중 랜덤 20개 샘플링
-    const shuffled = [...fullData].sort(() => Math.random() - 0.5);
-    const sampled = shuffled.slice(0, 20);
+    // 1. 사용자의 팀 찾기
+    const userTeam = findUserTeam(currentUser.name);
+    if (!userTeam) {
+        alert('❌ 팀을 찾을 수 없습니다. 팀 데이터를 확인해주세요.');
+        console.error('User team not found for:', currentUser.name);
+        return;
+    }
     
-    // 2. 각 레코드마다 NULLABLE 필드 중 랜덤하게 1개씩 결측값 생성 (총 20개)
+    const teamMemberNames = getTeamMemberNames(userTeam);
+    console.log('📋 User team:', userTeam.teamName, 'Members:', teamMemberNames);
+    
+    // 2. 본인 팀 제외한 54명 필터링
+    const otherPeople = fullData.filter(row => !teamMemberNames.includes(row.NAME));
+    console.log(`✅ Filtered ${otherPeople.length} people (excluding team members)`);
+    
+    // 3. 각 레코드마다 ALL_FIELDS 중 랜덤하게 3개씩 결측값 생성 (총 54 * 3 = 162개)
     const selectedMissing = [];
     
-    sampled.forEach((row, rowIndex) => {
-        // 각 레코드에서 NULLABLE 필드 중 랜덤하게 1개 선택
-        const randomFieldIndex = Math.floor(Math.random() * NULLABLE_FIELDS.length);
-        const selectedField = NULLABLE_FIELDS[randomFieldIndex];
+    otherPeople.forEach((row, rowIndex) => {
+        // 각 레코드에서 ALL_FIELDS를 섞어서 3개 선택
+        const shuffledFields = [...ALL_FIELDS].sort(() => Math.random() - 0.5);
+        const selectedFields = shuffledFields.slice(0, 3);
         
-        selectedMissing.push({
-            rowIndex: rowIndex,
-            field: selectedField
+        selectedFields.forEach(field => {
+            selectedMissing.push({
+                rowIndex: rowIndex,
+                field: field
+            });
         });
     });
+    
+    console.log(`📝 Created ${selectedMissing.length} missing cells`);
     
     // 결측값 저장 (원본 값 백업)
     missingCells = selectedMissing.map(pos => ({
         rowIndex: pos.rowIndex,
         field: pos.field,
-        originalValue: sampled[pos.rowIndex][pos.field],
-        name: sampled[pos.rowIndex]['NAME']
+        originalValue: otherPeople[pos.rowIndex][pos.field],
+        name: otherPeople[pos.rowIndex]['NAME']
     }));
     
     // VIEW에서 결측값 제거
-    userView = sampled.map((row, rowIndex) => {
+    userView = otherPeople.map((row, rowIndex) => {
         const newRow = { ...row };
         selectedMissing.forEach(pos => {
             if (pos.rowIndex === rowIndex) {
@@ -391,6 +447,11 @@ function showGameScreen() {
         missingCells = JSON.parse(savedMissing);
     }
     
+    // 총 결측값 개수 업데이트
+    const totalMissing = missingCells.length;
+    document.getElementById('totalMissing').textContent = totalMissing;
+    document.getElementById('totalMissing2').textContent = totalMissing;
+    
     renderTable();
     updateFilledCount();
     showScreen('gameScreen');
@@ -410,7 +471,7 @@ function renderTable() {
             const td = document.createElement('td');
             const value = row[field];
             
-            if (value === null || value === '') {
+            if (value === null || value === '' || value === undefined) {
                 // 결측 셀
                 td.classList.add('missing-cell');
                 const cellId = `${rowIndex}_${field}`;
@@ -419,6 +480,9 @@ function renderTable() {
                 if (userInputs[cellId]) {
                     td.textContent = userInputs[cellId];
                     td.classList.add('filled');
+                } else {
+                    // 입력되지 않은 결측값은 &nbsp;로 공간 확보
+                    td.innerHTML = '&nbsp;';
                 }
                 
                 td.addEventListener('click', () => openInputModal(rowIndex, field));
@@ -439,18 +503,53 @@ function openInputModal(rowIndex, field) {
     const fieldName = document.getElementById('modalFieldName');
     const personName = document.getElementById('modalPersonName');
     const input = document.getElementById('modalInput');
+    const modalHint = document.getElementById('modalHint');
     
     // 필드 이름 한글화
     const fieldNames = {
+        'NAME': '이름',
+        'S_NO': '기수',
+        'A_NO': '번호',
+        'DEPT': '전공',
         'MBTI': 'MBTI 성격유형',
         'AGE': '나이',
         'HT_CLSS': '가장 수강하기 싫었던 과목',
         'FV_SNGR': '가장 좋아하는 가수',
+        'STAFF_YN': '운영진 여부',
+        'ELMT_SCHL': '출신 초등학교',
         'HTWN': '고향'
     };
     
+    // 필드별 데이터 타입과 예시
+    const fieldHints = {
+        'NAME': { type: '문자열', example: '예: 김민수, 이지은' },
+        'S_NO': { type: '숫자', example: '예: 1, 2, 3, ..., 20' },
+        'A_NO': { type: '숫자', example: '예: 1, 2, 3, ..., 30' },
+        'DEPT': { type: '문자열', example: '예: 컴퓨터공학, 경영학, 전자공학' },
+        'MBTI': { type: '문자열 (4글자)', example: '예: INTJ, ENFP, ISTP' },
+        'AGE': { type: '숫자', example: '예: 21, 22, 23, 24, 25' },
+        'HT_CLSS': { type: '문자열', example: '예: 미적분학, 통계학, 물리학' },
+        'FV_SNGR': { type: '문자열', example: '예: 아이유, BTS, 뉴진스' },
+        'STAFF_YN': { type: '불린', example: '예: true 또는 false' },
+        'ELMT_SCHL': { type: '문자열', example: '예: 서울초등학교, 부산초등학교' },
+        'HTWN': { type: '문자열', example: '예: 서울, 부산, 대구' }
+    };
+    
     fieldName.textContent = fieldNames[field] || field;
-    personName.textContent = userView[rowIndex]['NAME'];
+    
+    // 데이터 타입과 예시 표시
+    const hint = fieldHints[field];
+    if (hint && modalHint) {
+        modalHint.innerHTML = `
+            <strong>타입:</strong> ${hint.type}<br>
+            <small>${hint.example}</small>
+        `;
+        modalHint.style.display = 'block';
+    }
+    
+    // NAME이 결측인 경우 행 번호로 표시
+    const nameValue = userView[rowIndex]['NAME'];
+    personName.textContent = nameValue || `${rowIndex + 1}번째 레코드`;
     
     const cellId = `${rowIndex}_${field}`;
     input.value = userInputs[cellId] || '';
@@ -513,9 +612,10 @@ function saveUserInputs() {
 // 제출 및 채점
 function handleSubmit() {
     const filledCount = Object.keys(userInputs).length;
+    const totalMissing = missingCells.length;
     
-    if (filledCount < 20) {
-        const confirm = window.confirm(`아직 ${20 - filledCount}개의 결측값이 남았습니다. 그래도 제출하시겠습니까?`);
+    if (filledCount < totalMissing) {
+        const confirm = window.confirm(`아직 ${totalMissing - filledCount}개의 결측값이 남았습니다. 그래도 제출하시겠습니까?`);
         if (!confirm) return;
     }
     
@@ -558,16 +658,23 @@ async function gradeSubmission() {
         });
     });
     
-    const score = (correctCount / 20) * 100;
+    const totalQuestions = missingCells.length;
+    const score = (correctCount / totalQuestions) * 100;
+    
+    // 팀 정보 추가
+    const userTeam = findUserTeam(currentUser.name);
     
     // 결과 저장
     await saveScore({
         userId: currentUser.userId,
         name: currentUser.name,
         sNo: currentUser.sNo,
+        teamNumber: userTeam ? userTeam.teamNumber : null,
+        teamName: userTeam ? userTeam.teamName : null,
         score: score,
         correctCount: correctCount,
         wrongCount: wrongCount,
+        totalQuestions: totalQuestions,
         timestamp: new Date().toISOString(),
         results: results
     });
@@ -591,10 +698,14 @@ async function saveScore(scoreData) {
 
 // 결과 화면 표시
 function showResultScreen(score, correctCount, wrongCount, results) {
+    const totalQuestions = correctCount + wrongCount;
+    
     document.getElementById('scoreValue').textContent = score.toFixed(0);
     document.getElementById('correctCount').textContent = correctCount;
     document.getElementById('wrongCount').textContent = wrongCount;
     document.getElementById('accuracyRate').textContent = score.toFixed(1);
+    document.getElementById('totalQuestions').textContent = totalQuestions;
+    document.getElementById('totalQuestions2').textContent = totalQuestions;
     
     const detailedResults = document.getElementById('detailedResults');
     detailedResults.innerHTML = '<h3>상세 결과</h3>';
@@ -604,16 +715,22 @@ function showResultScreen(score, correctCount, wrongCount, results) {
         div.className = `result-item ${result.isCorrect ? 'correct' : 'wrong'}`;
         
         const fieldNames = {
+            'NAME': '이름',
+            'S_NO': '기수',
+            'A_NO': '번호',
+            'DEPT': '전공',
             'MBTI': 'MBTI',
             'AGE': '나이',
             'HT_CLSS': '싫었던 과목',
             'FV_SNGR': '좋아하는 가수',
+            'STAFF_YN': '운영진',
+            'ELMT_SCHL': '초등학교',
             'HTWN': '고향'
         };
         
         div.innerHTML = `
             <div class="result-info">
-                <strong>${result.name}</strong> - ${fieldNames[result.field]}<br>
+                <strong>${result.name || '(이름 결측)'}</strong> - ${fieldNames[result.field] || result.field}<br>
                 <small>입력: ${result.userAnswer} | 정답: ${result.correctAnswer}</small>
             </div>
             <span class="result-badge ${result.isCorrect ? 'correct' : 'wrong'}">
@@ -679,6 +796,45 @@ function showScreen(screenId) {
 
 // ==================== 관리자 기능 ====================
 
+// 팀 평균 점수 계산
+function calculateTeamScores(allScores) {
+    const teamScoresMap = {};
+    
+    // 각 팀별로 점수 집계
+    allScores.forEach(score => {
+        if (score.teamNumber) {
+            if (!teamScoresMap[score.teamNumber]) {
+                teamScoresMap[score.teamNumber] = {
+                    teamNumber: score.teamNumber,
+                    teamName: score.teamName,
+                    scores: [],
+                    members: []
+                };
+            }
+            teamScoresMap[score.teamNumber].scores.push(score.score);
+            teamScoresMap[score.teamNumber].members.push({
+                name: score.name,
+                score: score.score
+            });
+        }
+    });
+    
+    // 팀 평균 계산
+    const teamScores = Object.values(teamScoresMap).map(team => ({
+        teamNumber: team.teamNumber,
+        teamName: team.teamName,
+        avgScore: team.scores.reduce((a, b) => a + b, 0) / team.scores.length,
+        memberCount: team.scores.length,
+        totalMembers: 6,
+        members: team.members
+    }));
+    
+    // 평균 점수로 정렬
+    teamScores.sort((a, b) => b.avgScore - a.avgScore);
+    
+    return teamScores;
+}
+
 // 관리자 화면 로드
 async function loadAdminScreen() {
     const allScores = await loadScoresFromGist();
@@ -689,23 +845,29 @@ async function loadAdminScreen() {
     // 참여자 수 업데이트
     document.getElementById('totalParticipants').textContent = allScores.length;
     
-    // 테이블 렌더링
+    // 팀 점수 계산 및 렌더링
+    const teamScores = calculateTeamScores(allScores);
+    renderTeamScores(teamScores);
+    
+    // 개인 점수 테이블 렌더링
     const tbody = document.getElementById('scoresTableBody');
     tbody.innerHTML = '';
     
     if (allScores.length === 0) {
         const tr = document.createElement('tr');
-        tr.innerHTML = '<td colspan="6" style="text-align: center; padding: 30px; color: #6b7280;">아직 제출한 참여자가 없습니다.</td>';
+        tr.innerHTML = '<td colspan="7" style="text-align: center; padding: 30px; color: #6b7280;">아직 제출한 참여자가 없습니다.</td>';
         tbody.appendChild(tr);
     } else {
         allScores.forEach((score, index) => {
             const tr = document.createElement('tr');
+            const totalQuestions = score.totalQuestions || 162;
             tr.innerHTML = `
                 <td>${index + 1}</td>
                 <td>${score.name}</td>
+                <td>${score.teamName || 'N/A'}</td>
                 <td>${score.sNo}기</td>
-                <td><strong>${score.score.toFixed(0)}점</strong></td>
-                <td>${score.correctCount} / ${score.wrongCount}</td>
+                <td><strong>${score.score.toFixed(1)}점</strong></td>
+                <td>${score.correctCount} / ${totalQuestions}</td>
                 <td>${new Date(score.timestamp).toLocaleString('ko-KR', { 
                     month: 'short', 
                     day: 'numeric', 
@@ -724,6 +886,31 @@ async function loadAdminScreen() {
     showScreen('adminScreen');
 }
 
+// 팀 점수 렌더링
+function renderTeamScores(teamScores) {
+    const tbody = document.getElementById('teamScoresTableBody');
+    tbody.innerHTML = '';
+    
+    if (teamScores.length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="5" style="text-align: center; padding: 30px; color: #6b7280;">아직 제출한 팀이 없습니다.</td>';
+        tbody.appendChild(tr);
+        return;
+    }
+    
+    teamScores.forEach((team, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${index + 1}</td>
+            <td><strong>${team.teamName}</strong></td>
+            <td><strong style="color: var(--primary-color);">${team.avgScore.toFixed(1)}점</strong></td>
+            <td>${team.memberCount} / ${team.totalMembers}</td>
+            <td style="font-size: 0.85rem;">${team.members.map(m => `${m.name} (${m.score.toFixed(0)}점)`).join(', ')}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
 // 관리자 상세 결과 모달 표시
 function showAdminDetail(scoreData) {
     // 기본 정보 설정
@@ -738,10 +925,16 @@ function showAdminDetail(scoreData) {
     detailedResults.innerHTML = '<h4 style="margin-bottom: 15px;">문항별 상세 결과</h4>';
     
     const fieldNames = {
+        'NAME': '이름',
+        'S_NO': '기수',
+        'A_NO': '번호',
+        'DEPT': '전공',
         'MBTI': 'MBTI',
         'AGE': '나이',
         'HT_CLSS': '싫었던 과목',
         'FV_SNGR': '좋아하는 가수',
+        'STAFF_YN': '운영진',
+        'ELMT_SCHL': '초등학교',
         'HTWN': '고향'
     };
     
@@ -751,7 +944,7 @@ function showAdminDetail(scoreData) {
         
         div.innerHTML = `
             <div class="result-info">
-                <strong>${index + 1}. ${result.name}</strong> - ${fieldNames[result.field]}<br>
+                <strong>${index + 1}. ${result.name || '(이름 결측)'}</strong> - ${fieldNames[result.field] || result.field}<br>
                 <small>입력: <strong>${result.userAnswer}</strong> | 정답: <strong>${result.correctAnswer}</strong></small>
             </div>
             <span class="result-badge ${result.isCorrect ? 'correct' : 'wrong'}">
