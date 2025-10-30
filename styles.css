@@ -277,22 +277,32 @@ tr:hover {
     border: 2px solid var(--missing-cell-border);
     cursor: pointer;
     position: relative;
-    min-height: 40px;
-    min-width: 80px;
+    min-height: 45px;
+    min-width: 100px;
     text-align: center;
     vertical-align: middle;
     font-weight: 600;
     padding: 12px 8px !important;
+    transition: all 0.2s ease;
 }
 
 .missing-cell:hover {
     background-color: #fde68a !important;
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
 }
 
-.missing-cell:not(.filled)::before {
-    content: '❓';
-    font-size: 1.2rem;
+.missing-cell:active {
+    transform: scale(0.98);
+}
+
+.placeholder-text {
+    font-size: 0.9rem;
+    color: #92400e;
+    font-weight: 500;
     display: inline-block;
+    pointer-events: none;
+    user-select: none;
 }
 
 .missing-cell.filled {

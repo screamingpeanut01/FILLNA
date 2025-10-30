@@ -474,15 +474,24 @@ function renderTable() {
             if (value === null || value === '' || value === undefined) {
                 // 결측 셀
                 td.classList.add('missing-cell');
+                td.setAttribute('role', 'button');
+                td.setAttribute('tabindex', '0');
                 const cellId = `${rowIndex}_${field}`;
                 
                 // 이미 입력된 값이 있는지 확인
                 if (userInputs[cellId]) {
                     td.textContent = userInputs[cellId];
                     td.classList.add('filled');
+                    td.setAttribute('aria-label', `Filled: ${userInputs[cellId]}`);
                 } else {
-                    // 입력되지 않은 결측값은 &nbsp;로 공간 확보
-                    td.innerHTML = '&nbsp;';
+                    // 입력되지 않은 결측값 - 명확한 플레이스홀더 추가
+                    td.innerHTML = '<span class="placeholder-text">❓ 클릭하여 입력</span>';
+                    td.setAttribute('data-clickable', 'true');
+                    td.setAttribute('data-cell-id', cellId);
+                    td.setAttribute('data-field', field);
+                    td.setAttribute('data-row', rowIndex);
+                    td.setAttribute('title', `클릭하여 ${field} 값을 입력하세요`);
+                    td.setAttribute('aria-label', `Empty cell for ${field}, click to input`);
                 }
                 
                 td.addEventListener('click', () => openInputModal(rowIndex, field));
