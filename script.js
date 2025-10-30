@@ -796,7 +796,10 @@ async function gradeSubmission() {
         const correctAnswer = cell.originalValue;
         
         // 새로운 비교 함수 사용 (정규화 + 유사도)
-        const isCorrect = !!(userAnswer && compareAnswers(userAnswer, correctAnswer, cell.field));
+        let isCorrect = false;
+        if (userAnswer) {
+            isCorrect = compareAnswers(userAnswer, correctAnswer, cell.field) === true;
+        }
         
         if (isCorrect) {
             correctCount++;
@@ -805,10 +808,10 @@ async function gradeSubmission() {
         }
         
         results.push({
-            name: cell.name,
-            field: cell.field,
+            name: cell.name || '',
+            field: cell.field || '',
             userAnswer: userAnswer || '(미입력)',
-            correctAnswer: correctAnswer,
+            correctAnswer: correctAnswer || '',
             isCorrect: isCorrect
         });
     });
