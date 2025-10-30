@@ -1,6 +1,7 @@
 // 전역 변수
 let fullData = [];
 let teamsData = [];
+let answersData = null; // 허용 답안 데이터
 let currentUser = null;
 let userView = null;
 let missingCells = [];
@@ -108,6 +109,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         initFirebase(); // Firebase 초기화
         await loadCSVData();
         await loadTeamsData();
+        await loadAnswersData(); // 허용 답안 로드
         setupEventListeners();
         checkExistingUser();
         console.log('✅ 페이지 초기화 완료');
@@ -162,6 +164,27 @@ async function loadTeamsData() {
     } catch (error) {
         console.error('❌ Error loading teams:', error);
         alert('❌ 팀 데이터를 불러오는데 실패했습니다.\n\n' + error.message + '\n\n페이지를 새로고침해주세요.');
+    }
+}
+
+// 허용 답안 데이터 로드
+async function loadAnswersData() {
+    try {
+        console.log('📂 허용 답안 로드 시작...');
+        const response = await fetch('answers.json');
+        
+        if (!response.ok) {
+            console.warn('허용 답안 파일이 없습니다. 기본 채점 방식을 사용합니다.');
+            answersData = null;
+            return;
+        }
+        
+        answersData = await response.json();
+        console.log('✅ 허용 답안 로드 완료');
+    } catch (error) {
+        console.error('❌ Error loading answers:', error);
+        console.warn('허용 답안 로드 실패. 기본 채점 방식을 사용합니다.');
+        answersData = null;
     }
 }
 
@@ -631,6 +654,101 @@ function handleSubmit() {
     gradeSubmission();
 }
 
+// 허용 답안 체크 함수
+function checkAnswer(userAnswer, correctAnswer, field) {
+    if (!userAnswer) return false;
+    
+    // 1단계: 정규화 후 정확 일치
+    const normalizedUser = normalizeAnswer(userAnswer, field);
+    const normalizedCorrect = normalizeAnswer(correctAnswer, field);
+    
+    if (normalizedUser === normalizedCorrect) {
+        return true;
+    }
+    
+    // 2단계: 허용 답안 목록 체크
+    if (answersData && answersData.globalRules && answersData.globalRules[field]) {
+        const fieldRules = answersData.globalRules[field];
+        
+        // correctAnswer가 어떤 canonical 값인지 찾기
+        for (const [canonical, alternatives] of Object.entries(fieldRules)) {
+            // correctAnswer가 이 그룹에 속하는지 확인
+            const normalizedCanonical = normalizeAnswer(canonical, field);
+            const normalizedAlts = alternatives.map(alt => normalizeAnswer(alt, field));
+            
+            if (normalizedCorrect === normalizedCanonical || normalizedAlts.includes(normalizedCorrect)) {
+                // 이 그룹에 속함 - userAnswer도 이 그룹에 속하는지 확인
+                if (normalizedUser === normalizedCanonical || normalizedAlts.includes(normalizedUser)) {
+                    return true;
+                }
+            }
+        }
+    }
+    
+    return false;
+}
+
+// 답안 정규화 함수
+function normalizeAnswer(answer, field) {
+    if (!answer) return '';
+    
+    let normalized = answer.toString().trim();
+    
+    // answers.json의 필드별 정규화 규칙 적용
+    if (answersData && answersData.fieldSpecificRules && answersData.fieldSpecificRules[field]) {
+        const rule = answersData.fieldSpecificRules[field].normalization;
+        
+        switch(rule) {
+            case 'uppercase_no_spaces':
+                // MBTI: 대문자 변환, 공백 제거
+                return normalized.toUpperCase().replace(/\s+/g, '');
+                
+            case 'number_only':
+                // 숫자 필드: 숫자만 추출
+                return normalized.replace(/\D/g, '');
+                
+            case 'remove_spaces_lowercase':
+                // NAME: 공백 제거, 소문자 변환
+                return normalized.toLowerCase().replace(/\s+/g, '');
+                
+            case 'flexible_text':
+                // 유연한 텍스트: 소문자, 공백 단일화, 특수문자 제거
+                return normalized
+                    .toLowerCase()
+                    .replace(/\s+/g, ' ')
+                    .replace(/[-.()]/g, '')
+                    .trim();
+                    
+            default:
+                return normalized.toLowerCase();
+        }
+    }
+    
+    // 필드별 기본 처리
+    switch(field) {
+        case 'MBTI':
+            return normalized.toUpperCase().replace(/\s+/g, '');
+            
+        case 'AGE':
+        case 'S_NO':
+        case 'A_NO':
+            return normalized.replace(/\D/g, '');
+            
+        case 'STAFF_YN':
+            normalized = normalized.toLowerCase();
+            if (['true', 'yes', 'y', '예', 'o', '참'].includes(normalized)) return 'true';
+            if (['false', 'no', 'n', '아니오', 'x', '거짓'].includes(normalized)) return 'false';
+            return normalized;
+            
+        default:
+            return normalized
+                .toLowerCase()
+                .replace(/\s+/g, ' ')
+                .replace(/[-.()]/g, '')
+                .trim();
+    }
+}
+
 // 채점
 async function gradeSubmission() {
     let correctCount = 0;
@@ -642,15 +760,8 @@ async function gradeSubmission() {
         const userAnswer = userInputs[cellId];
         const correctAnswer = cell.originalValue;
         
-        let isCorrect = false;
-        
-        if (userAnswer) {
-            // 대소문자 무시, 공백 제거 후 비교
-            const normalizedUser = userAnswer.toString().trim().toLowerCase();
-            const normalizedCorrect = correctAnswer.toString().trim().toLowerCase();
-            
-            isCorrect = normalizedUser === normalizedCorrect;
-        }
+        // 새로운 허용 답안 체크 함수 사용
+        const isCorrect = checkAnswer(userAnswer, correctAnswer, cell.field);
         
         if (isCorrect) {
             correctCount++;
@@ -932,6 +1043,9 @@ function renderTeamScores(teamScores) {
 
 // 관리자 상세 결과 모달 표시
 function showAdminDetail(scoreData) {
+    // scoreData를 전역으로 저장 (수정용)
+    window.currentEditingScore = JSON.parse(JSON.stringify(scoreData)); // 깊은 복사
+    
     // 기본 정보 설정
     document.getElementById('adminDetailName').textContent = scoreData.name;
     document.getElementById('adminDetailSNo').textContent = scoreData.sNo + '기';
@@ -940,8 +1054,35 @@ function showAdminDetail(scoreData) {
     document.getElementById('adminDetailTime').textContent = new Date(scoreData.timestamp).toLocaleString('ko-KR');
     
     // 상세 결과 렌더링
+    renderAdminDetailResults();
+    
+    // 모달 표시
+    document.getElementById('adminDetailModal').classList.add('active');
+}
+
+// 관리자 상세 결과 렌더링 (재사용 가능)
+function renderAdminDetailResults() {
+    const scoreData = window.currentEditingScore;
+    if (!scoreData) return;
+    
     const detailedResults = document.getElementById('adminDetailResults');
-    detailedResults.innerHTML = '<h4 style="margin-bottom: 15px;">문항별 상세 결과</h4>';
+    detailedResults.innerHTML = '';
+    
+    // 제목과 재채점 버튼
+    const header = document.createElement('div');
+    header.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;';
+    header.innerHTML = `
+        <h4 style="margin: 0;">문항별 상세 결과 (클릭하여 수정)</h4>
+        <button id="adminRecalculateBtn" class="btn btn-primary" style="width: auto; padding: 8px 16px; font-size: 14px;">
+            💾 재채점 및 저장
+        </button>
+    `;
+    detailedResults.appendChild(header);
+    
+    // 재채점 버튼 이벤트 리스너
+    document.getElementById('adminRecalculateBtn').addEventListener('click', () => {
+        recalculateAndSaveScore();
+    });
     
     const fieldNames = {
         'NAME': '이름',
@@ -959,28 +1100,129 @@ function showAdminDetail(scoreData) {
     
     scoreData.results.forEach((result, index) => {
         const div = document.createElement('div');
-        div.className = `result-item ${result.isCorrect ? 'correct' : 'wrong'}`;
+        div.className = `result-item ${result.isCorrect ? 'correct' : 'wrong'} admin-editable`;
+        div.style.cursor = 'pointer';
+        div.dataset.index = index;
         
         div.innerHTML = `
             <div class="result-info">
                 <strong>${index + 1}. ${result.name || '(이름 결측)'}</strong> - ${fieldNames[result.field] || result.field}<br>
                 <small>입력: <strong>${result.userAnswer}</strong> | 정답: <strong>${result.correctAnswer}</strong></small>
             </div>
-            <span class="result-badge ${result.isCorrect ? 'correct' : 'wrong'}">
+            <button class="toggle-answer-btn ${result.isCorrect ? 'correct' : 'wrong'}" data-index="${index}">
                 ${result.isCorrect ? '✓ 정답' : '✗ 오답'}
-            </span>
+            </button>
         `;
+        
+        // 클릭 이벤트: 정답/오답 토글
+        const toggleBtn = div.querySelector('.toggle-answer-btn');
+        toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleAnswerCorrectness(index);
+        });
         
         detailedResults.appendChild(div);
     });
+}
+
+// 정답/오답 토글
+function toggleAnswerCorrectness(index) {
+    const scoreData = window.currentEditingScore;
+    if (!scoreData || !scoreData.results[index]) return;
     
-    // 모달 표시
-    document.getElementById('adminDetailModal').classList.add('active');
+    // 정답/오답 반전
+    scoreData.results[index].isCorrect = !scoreData.results[index].isCorrect;
+    
+    // UI 즉시 업데이트
+    renderAdminDetailResults();
+    
+    console.log(`📝 답안 ${index + 1} 토글됨:`, scoreData.results[index].isCorrect ? '정답' : '오답');
+}
+
+// 재채점 및 저장
+async function recalculateAndSaveScore() {
+    const scoreData = window.currentEditingScore;
+    if (!scoreData) {
+        alert('❌ 점수 데이터를 찾을 수 없습니다.');
+        return;
+    }
+    
+    const confirmSave = window.confirm(
+        '⚠️ 수정된 채점 결과를 저장하시겠습니까?\n\n' +
+        '이 작업은 Firebase의 점수를 업데이트하며,\n' +
+        '해당 참여자의 점수가 변경됩니다.'
+    );
+    
+    if (!confirmSave) return;
+    
+    try {
+        showLoading();
+        
+        // 1. 정답/오답 수 재계산
+        let correctCount = 0;
+        let wrongCount = 0;
+        
+        scoreData.results.forEach(result => {
+            if (result.isCorrect) {
+                correctCount++;
+            } else {
+                wrongCount++;
+            }
+        });
+        
+        const totalQuestions = scoreData.results.length;
+        const newScore = (correctCount / totalQuestions) * 100;
+        
+        console.log(`📊 재채점 결과: ${correctCount}/${totalQuestions} = ${newScore.toFixed(1)}점`);
+        
+        // 2. scoreData 업데이트
+        scoreData.correctCount = correctCount;
+        scoreData.wrongCount = wrongCount;
+        scoreData.score = newScore;
+        scoreData.timestamp = new Date().toISOString(); // 수정 시간 업데이트
+        
+        // 3. Firebase에서 모든 점수 로드
+        const allScores = await loadScoresFromGist();
+        
+        // 4. 해당 사용자의 점수 찾아서 업데이트
+        const userIndex = allScores.findIndex(s => s.userId === scoreData.userId);
+        
+        if (userIndex === -1) {
+            hideLoading();
+            alert('❌ 해당 사용자의 점수를 찾을 수 없습니다.');
+            return;
+        }
+        
+        allScores[userIndex] = scoreData;
+        
+        // 5. Firebase에 저장
+        await saveScoresToGist(allScores);
+        
+        hideLoading();
+        
+        // 6. UI 업데이트
+        document.getElementById('adminDetailScore').textContent = newScore.toFixed(1);
+        document.getElementById('adminDetailAccuracy').textContent = newScore.toFixed(1);
+        
+        alert(`✅ 재채점 완료!\n\n새 점수: ${newScore.toFixed(1)}점\n정답: ${correctCount}개\n오답: ${wrongCount}개`);
+        
+        // 7. 관리자 화면 새로고침
+        await loadAdminScreen();
+        
+        // 8. 모달 닫기
+        closeAdminDetailModal();
+        
+    } catch (error) {
+        hideLoading();
+        console.error('❌ 재채점 저장 오류:', error);
+        alert('❌ 재채점 저장 중 오류가 발생했습니다:\n\n' + error.message);
+    }
 }
 
 // 관리자 상세 모달 닫기
 function closeAdminDetailModal() {
     document.getElementById('adminDetailModal').classList.remove('active');
+    window.currentEditingScore = null; // 편집 데이터 초기화
 }
 
 // 모든 데이터 초기화

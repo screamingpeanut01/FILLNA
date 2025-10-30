@@ -1,0 +1,82 @@
+{
+  "description": "FILLNA 게임 허용 답안 목록 - 각 필드별 동의어 및 허용 표기",
+  "version": "1.0",
+  "lastUpdated": "2025-10-30",
+  
+  "globalRules": {
+    "FV_SNGR": {
+      "아이유": ["아이유", "IU", "iu", "Iu", "아유", "이유", "아이유님"],
+      "BTS": ["BTS", "bts", "Bts", "방탄소년단", "방탄", "비티에스", "비티스", "방탄소년", "bangtan"],
+      "뉴진스": ["뉴진스", "NewJeans", "New Jeans", "newjeans", "new jeans", "뉴진", "뉴지"],
+      "아이브": ["아이브", "IVE", "ive", "Ive", "아브", "아이"],
+      "세븐틴": ["세븐틴", "SEVENTEEN", "seventeen", "Seventeen", "SVT", "svt", "세븐", "17"],
+      "르세라핌": ["르세라핌", "LE SSERAFIM", "le sserafim", "르세라", "세라핌", "lesserafim", "Le Sserafim"],
+      "에스파": ["에스파", "aespa", "AESPA", "Aespa", "애스파", "에파"],
+      "NCT": ["NCT", "nct", "Nct", "엔시티", "엔씨티"],
+      "블랙핑크": ["블랙핑크", "BLACKPINK", "blackpink", "Blackpink", "블핑", "블랙", "Black Pink"],
+      "레드벨벳": ["레드벨벳", "Red Velvet", "red velvet", "RedVelvet", "redvelvet", "레벨", "레벨", "레드"],
+      "트와이스": ["트와이스", "TWICE", "twice", "Twice", "트와", "트"],
+      "엑소": ["엑소", "EXO", "exo", "Exo", "엑스오"],
+      "있지": ["있지", "ITZY", "itzy", "Itzy", "잇지", "이쯔"],
+      "스트레이키즈": ["스트레이키즈", "Stray Kids", "stray kids", "StrayKids", "straykids", "스키즈", "스트레이", "스키"],
+      "방탄소년단": ["방탄소년단", "BTS", "bts", "방탄", "비티에스"]
+    },
+    "STAFF_YN": {
+      "true": ["true", "True", "TRUE", "yes", "Yes", "YES", "y", "Y", "예", "o", "O", "참", "맞음", "1"],
+      "false": ["false", "False", "FALSE", "no", "No", "NO", "n", "N", "아니오", "x", "X", "거짓", "아님", "0"]
+    },
+    "DEPT": {
+      "컴퓨터공학": ["컴퓨터공학", "컴공", "컴퓨터", "computer science", "CS"],
+      "경영학": ["경영학", "경영", "business", "Business Administration"],
+      "전자공학": ["전자공학", "전자", "전공", "EE", "Electronic Engineering"],
+      "심리학": ["심리학", "심리", "Psychology"],
+      "경제학": ["경제학", "경제", "Economics"],
+      "디자인학": ["디자인학", "디자인", "Design"],
+      "건축학": ["건축학", "건축", "Architecture"],
+      "법학": ["법학", "법", "Law"]
+    }
+  },
+  
+  "fieldSpecificRules": {
+    "MBTI": {
+      "normalization": "uppercase_no_spaces",
+      "description": "대소문자 구분 없음, 공백 무시"
+    },
+    "S_NO": {
+      "normalization": "number_only",
+      "description": "숫자만 추출하여 비교"
+    },
+    "A_NO": {
+      "normalization": "number_only",
+      "description": "숫자만 추출하여 비교"
+    },
+    "AGE": {
+      "normalization": "number_only",
+      "description": "숫자만 추출하여 비교"
+    },
+    "NAME": {
+      "normalization": "remove_spaces_lowercase",
+      "description": "공백 제거, 소문자 변환"
+    },
+    "ELMT_SCHL": {
+      "normalization": "flexible_text",
+      "description": "공백/특수문자 관대, 초등학교/초 허용"
+    },
+    "HTWN": {
+      "normalization": "flexible_text",
+      "description": "공백/특수문자 관대"
+    },
+    "HT_CLSS": {
+      "normalization": "flexible_text",
+      "description": "공백/특수문자 관대"
+    }
+  },
+  
+  "comments": {
+    "usage": "이 파일은 FILLNA 게임의 채점 정확도를 높이기 위한 허용 답안 목록입니다.",
+    "globalRules": "모든 레코드에 공통으로 적용되는 동의어 목록입니다.",
+    "fieldSpecificRules": "필드별 정규화 규칙을 정의합니다.",
+    "maintenance": "새로운 동의어가 발견되면 이 파일에 추가해주세요."
+  }
+}
+

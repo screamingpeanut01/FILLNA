@@ -584,6 +584,76 @@ tr:hover {
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
+/* 관리자 검토 UI */
+.admin-editable {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.admin-editable:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-answer-btn {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-answer-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-answer-btn:active {
+    transform: scale(0.95);
+}
+
+.toggle-answer-btn.correct {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.toggle-answer-btn.correct:hover {
+    background-color: #059669;
+}
+
+.toggle-answer-btn.wrong {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.toggle-answer-btn.wrong:hover {
+    background-color: #dc2626;
+}
+
+/* 재채점 버튼 */
+#adminRecalculateBtn {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #6366f1 100%);
+    box-shadow: 0 4px 8px rgba(79, 70, 229, 0.3);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+#adminRecalculateBtn:hover {
+    box-shadow: 0 6px 12px rgba(79, 70, 229, 0.5);
+    animation: none;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 4px 8px rgba(79, 70, 229, 0.3);
+    }
+    50% {
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.5);
+    }
+}
+
 /* 애니메이션 */
 @keyframes fadeIn {
     from { opacity: 0; }
