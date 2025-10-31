@@ -55,7 +55,8 @@
         {"name": "이유정", "sNo": 3, "aNo": 3, "dept": null, "inData": false},
         {"name": "김수린", "sNo": 4, "aNo": 4, "dept": null, "inData": false},
         {"name": "김미정", "sNo": 5, "aNo": 5, "dept": "경영학과", "inData": true},
-        {"name": "곽주영", "sNo": 5, "aNo": 5, "dept": "응용통계학과", "inData": true}
+        {"name": "곽주영", "sNo": 5, "aNo": 5, "dept": "응용통계학과", "inData": true},
+        {"name": "후영리", "sNo": 6, "aNo": 6, "dept": "경영학과", "inData": true}
       ]
     },
     {
@@ -121,10 +122,10 @@
   ],
   "metadata": {
     "totalTeams": 10,
-    "totalMembers": 58,
-    "membersInData": 51,
+    "totalMembers": 59,
+    "membersInData": 52,
     "membersNotInData": 7,
     "notInDataList": ["장서현", "김태연(4기)", "이유정", "김수린", "송재호", "서효정", "김선교"],
-    "notes": "inData=false인 멤버는 설문 미참여자로 data.csv에 없지만 게임 참여 가능. data.csv에는 있지만 팀에 없는 사람(후영리)도 있음 - 게임 참여 불가"
+    "notes": "inData=false인 멤버는 설문 미참여자로 data.csv에 없지만 게임 참여 가능"
   }
 }
