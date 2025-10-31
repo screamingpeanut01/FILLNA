@@ -188,14 +188,25 @@ async function loadAnswersData() {
     }
 }
 
-// 사용자의 팀 찾기
-function findUserTeam(name) {
+// 사용자의 팀 찾기 (이름과 기수로 매칭)
+function findUserTeam(name, sNo) {
+    // 동명이인 처리를 위해 이름과 기수를 모두 확인
     for (let team of teamsData) {
-        const member = team.members.find(m => m.name === name);
+        const member = team.members.find(m => m.name === name && m.sNo == sNo);
         if (member) {
             return team;
         }
     }
+    
+    // 기수가 일치하지 않으면 이름만으로 찾기 (후방 호환성)
+    for (let team of teamsData) {
+        const member = team.members.find(m => m.name === name);
+        if (member) {
+            console.warn(`⚠️ 이름만으로 팀을 찾았습니다. 기수 확인 필요: ${name} (입력: ${sNo}기, 팀: ${member.sNo}기)`);
+            return team;
+        }
+    }
+    
     return null;
 }
 
@@ -350,13 +361,13 @@ function handleLogin() {
         return;
     }
     
-    if (!sNo || !name) {
+    if (sNo === '' || !name) {
         errorDiv.textContent = '기수와 이름을 모두 입력해주세요.';
         return;
     }
     
-    if (sNo < 1 || sNo > 20) {
-        errorDiv.textContent = '기수는 1-20 사이의 값이어야 합니다.';
+    if (sNo < 0 || sNo > 30) {
+        errorDiv.textContent = '기수는 0-30 사이의 값이어야 합니다.';
         return;
     }
     
@@ -402,10 +413,10 @@ function loadUserData() {
 // 사용자 VIEW 생성
 function createUserView() {
     // 1. 사용자의 팀 찾기
-    const userTeam = findUserTeam(currentUser.name);
+    const userTeam = findUserTeam(currentUser.name, currentUser.sNo);
     if (!userTeam) {
-        alert('❌ 팀을 찾을 수 없습니다. 팀 데이터를 확인해주세요.');
-        console.error('User team not found for:', currentUser.name);
+        alert('❌ 팀을 찾을 수 없습니다. 팀 데이터를 확인해주세요.\n\n입력 정보:\n- 기수: ' + currentUser.sNo + '기\n- 이름: ' + currentUser.name);
+        console.error('User team not found for:', currentUser.name, currentUser.sNo);
         return;
     }
     
@@ -782,7 +793,7 @@ async function gradeSubmission() {
     const score = (correctCount / totalQuestions) * 100;
     
     // 팀 정보 추가
-    const userTeam = findUserTeam(currentUser.name);
+    const userTeam = findUserTeam(currentUser.name, currentUser.sNo);
     
     // 결과 저장
     await saveScore({

@@ -1,7 +1,7 @@
 {
   "description": "FILLNA 게임 허용 답안 목록 - 각 필드별 동의어 및 허용 표기",
-  "version": "1.0",
-  "lastUpdated": "2025-10-30",
+  "version": "2.0",
+  "lastUpdated": "2025-10-31",
   
   "globalRules": {
     "FV_SNGR": {
@@ -14,26 +14,75 @@
       "에스파": ["에스파", "aespa", "AESPA", "Aespa", "애스파", "에파"],
       "NCT": ["NCT", "nct", "Nct", "엔시티", "엔씨티"],
       "블랙핑크": ["블랙핑크", "BLACKPINK", "blackpink", "Blackpink", "블핑", "블랙", "Black Pink"],
-      "레드벨벳": ["레드벨벳", "Red Velvet", "red velvet", "RedVelvet", "redvelvet", "레벨", "레벨", "레드"],
+      "레드벨벳": ["레드벨벳", "Red Velvet", "red velvet", "RedVelvet", "redvelvet", "레벨", "레드"],
       "트와이스": ["트와이스", "TWICE", "twice", "Twice", "트와", "트"],
       "엑소": ["엑소", "EXO", "exo", "Exo", "엑스오"],
       "있지": ["있지", "ITZY", "itzy", "Itzy", "잇지", "이쯔"],
       "스트레이키즈": ["스트레이키즈", "Stray Kids", "stray kids", "StrayKids", "straykids", "스키즈", "스트레이", "스키"],
-      "방탄소년단": ["방탄소년단", "BTS", "bts", "방탄", "비티에스"]
+      "방탄소년단": ["방탄소년단", "BTS", "bts", "방탄", "비티에스"],
+      "윤하": ["윤하", "Younha", "younha", "YOUNHA"],
+      "코르티즈": ["코르티즈", "khortez", "Khortez", "코티즈"],
+      "백아": ["백아", "Baek A", "baek a", "백아"],
+      "한로로": ["한로로", "한 로로", "hanroro"],
+      "페노메코": ["페노메코", "Penomeco", "penomeco", "페노"],
+      "로이킴": ["로이킴", "Roy Kim", "roy kim", "로이", "로이 킴"],
+      "루시": ["루시", "LUCY", "lucy", "Lucy"],
+      "장기하": ["장기하", "장기하와얼굴들", "장기하와 얼굴들"],
+      "잔나비": ["잔나비", "JANNABI", "jannabi", "Jannabi"],
+      "테일러스위프트": ["테일러스위프트", "테일러 스위프트", "Taylor Swift", "taylor swift", "테일러", "스위프트"],
+      "Ed Sheeran": ["Ed Sheeran", "ed sheeran", "Ed sheeran", "에드시런", "에드 시런", "에드쉬런"],
+      "카더가든": ["카더가든", "Car the garden", "car the garden", "Car The Garden", "카 더 가든"],
+      "케이팝": ["케이팝", "K-pop", "kpop", "Kpop", "KPOP"],
+      "콜드플레이": ["콜드플레이", "Coldplay", "coldplay", "콜플"],
+      "브루노마스": ["브루노마스", "브루노 마스", "Bruno Mars", "bruno mars", "브루노"],
+      "임세모": ["임세모", "임 세모"],
+      "오아시스": ["오아시스", "Oasis", "oasis", "OASIS"],
+      "개리": ["개리", "Gary", "gary", "게리"],
+      "백예린": ["백예린", "Yerin Baek", "yerin baek", "예린"],
+      "이창섭": ["이창섭", "Lee Changsub", "창섭"],
+      "유다빈": ["유다빈", "다빈"],
+      "오존": ["오존", "ozone", "Ozone", "OZONE"],
+      "데이식스": ["데이식스", "DAY6", "day6", "Day6", "데이6"],
+      "빈지노": ["빈지노", "Beenzino", "beenzino", "빈지"],
+      "너드 커넥션": ["너드 커넥션", "너드커넥션", "Nerd Connection", "nerd connection"],
+      "멜로망스": ["멜로망스", "MeloMance", "melomance", "Melomance"],
+      "윤석원": ["윤석원", "석원"],
+      "오월오일": ["오월오일", "오월 오일", "5월 5일"],
+      "우즈": ["우즈", "Wooze", "wooze", "WOODZ"],
+      "포스트말론": ["포스트말론", "포스트 말론", "Post Malone", "post malone", "포말"],
+      "태연": ["태연", "Taeyeon", "taeyeon", "TAEYEON", "태연이"],
+      "조유리": ["조유리", "유리"],
+      "Khalid": ["Khalid", "khalid", "칼리드"],
+      "이문세": ["이문세", "이 문세", "문세"],
+      "Keshi": ["Keshi", "keshi", "케시"],
+      "저스틴 비버": ["저스틴 비버", "저스틴비버", "Justin Bieber", "justin bieber", "비버"],
+      "수지": ["수지", "Suzy", "suzy", "SUZY"],
+      "TheWeekend": ["TheWeekend", "The Weekend", "the weekend", "더 위켄드", "위켄드"],
+      "배치기": ["배치기", "Baechi", "baechi"],
+      "오피셜 히게단디즘": ["오피셜 히게단디즘", "오피셜히게단디즘", "Official HIGE DANdism", "히게단"]
     },
     "STAFF_YN": {
-      "true": ["true", "True", "TRUE", "yes", "Yes", "YES", "y", "Y", "예", "o", "O", "참", "맞음", "1"],
-      "false": ["false", "False", "FALSE", "no", "No", "NO", "n", "N", "아니오", "x", "X", "거짓", "아님", "0"]
+      "true": ["true", "True", "TRUE", "yes", "Yes", "YES", "y", "Y", "예", "o", "O", "참", "맞음", "1", "운영진", "참여"],
+      "false": ["false", "False", "FALSE", "no", "No", "NO", "n", "N", "아니오", "x", "X", "거짓", "아님", "0", "비운영진", "미참여"]
     },
     "DEPT": {
-      "컴퓨터공학": ["컴퓨터공학", "컴공", "컴퓨터", "computer science", "CS"],
-      "경영학": ["경영학", "경영", "business", "Business Administration"],
-      "전자공학": ["전자공학", "전자", "전공", "EE", "Electronic Engineering"],
-      "심리학": ["심리학", "심리", "Psychology"],
-      "경제학": ["경제학", "경제", "Economics"],
-      "디자인학": ["디자인학", "디자인", "Design"],
-      "건축학": ["건축학", "건축", "Architecture"],
-      "법학": ["법학", "법", "Law"]
+      "경영학과": ["경영학과", "경영학", "경영", "Business", "business", "경영학과?"],
+      "응용통계학과": ["응용통계학과", "응통", "응용통계", "Statistics", "statistics", "통계", "응용통계학과?"],
+      "경제학과": ["경제학과", "경제학", "경제", "Economics", "economics"],
+      "교육학과": ["교육학과", "교육학", "교육", "Education", "education"],
+      "국제물류학과": ["국제물류학과", "국제물류", "물류학과", "물류"],
+      "글로벌금융학과": ["글로벌금융학과", "글로벌금융", "금융학과", "금융"],
+      "도시계획부동산학과": ["도시계획부동산학과", "도시계획부동산", "부동산학과", "부동산", "도계부"],
+      "물리학과": ["물리학과", "물리학", "물리", "Physics", "physics"],
+      "사회학과": ["사회학과", "사회학", "사회", "Sociology", "sociology"],
+      "산업보안학과": ["산업보안학과", "산업보안", "보안학과", "보안"],
+      "소프트웨어학과": ["소프트웨어학과", "소프트웨어", "소웨", "Software", "software"],
+      "수학과": ["수학과", "수학", "Math", "math", "Mathematics"],
+      "영어영문학과": ["영어영문학과", "영어영문", "영문", "English", "english"],
+      "예술공학부": ["예술공학부", "예술공학", "예공"],
+      "정치국제학과": ["정치국제학과", "정치국제", "정국", "Political Science"],
+      "중국어문학과": ["중국어문학과", "중국어문", "중문", "Chinese", "chinese"],
+      "경영학과?": ["경영학과?", "경영학과", "경영학", "경영"]
     }
   },
   
@@ -60,15 +109,20 @@
     },
     "ELMT_SCHL": {
       "normalization": "flexible_text",
-      "description": "공백/특수문자 관대, 초등학교/초 허용"
+      "description": "공백/특수문자 관대, 초등학교/초/고등학교 허용",
+      "notes": "특수 학교명도 포함"
     },
     "HTWN": {
       "normalization": "flexible_text",
-      "description": "공백/특수문자 관대"
+      "description": "공백/특수문자 관대, 서울? 등 물음표 허용"
     },
     "HT_CLSS": {
       "normalization": "flexible_text",
-      "description": "공백/특수문자 관대"
+      "description": "공백/특수문자 관대, 대소문자 무시"
+    },
+    "FV_SNGR": {
+      "normalization": "flexible_text",
+      "description": "공백/특수문자 관대, 쉼표로 구분된 복수 가수 허용"
     }
   },
   
@@ -76,7 +130,7 @@
     "usage": "이 파일은 FILLNA 게임의 채점 정확도를 높이기 위한 허용 답안 목록입니다.",
     "globalRules": "모든 레코드에 공통으로 적용되는 동의어 목록입니다.",
     "fieldSpecificRules": "필드별 정규화 규칙을 정의합니다.",
-    "maintenance": "새로운 동의어가 발견되면 이 파일에 추가해주세요."
+    "maintenance": "새로운 동의어가 발견되면 이 파일에 추가해주세요.",
+    "version_notes": "v2.0 - data.csv의 모든 실제 값을 반영하여 업데이트"
   }
 }
-
