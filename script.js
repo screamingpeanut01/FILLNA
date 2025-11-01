@@ -215,6 +215,11 @@ function getTeamMemberNames(team) {
     return team.members.map(m => m.name);
 }
 
+// 팀원 정보 목록 가져오기 (이름 + 기수)
+function getTeamMemberInfo(team) {
+    return team.members.map(m => ({ name: m.name, sNo: m.sNo }));
+}
+
 // CSV 파싱 함수
 function parseCSV(csvText) {
     const lines = csvText.trim().split('\n');
@@ -421,10 +426,15 @@ function createUserView() {
     }
     
     const teamMemberNames = getTeamMemberNames(userTeam);
+    const teamMemberInfo = getTeamMemberInfo(userTeam);
     console.log('📋 User team:', userTeam.teamName, 'Members:', teamMemberNames);
     
-    // 2. 본인 팀 제외한 나머지 참가자 필터링
-    const otherPeople = fullData.filter(row => !teamMemberNames.includes(row.NAME));
+    // 2. 본인 팀 제외한 나머지 참가자 필터링 (이름 + 기수로 비교하여 동명이인 처리)
+    const otherPeople = fullData.filter(row => {
+        return !teamMemberInfo.some(member => 
+            member.name === row.NAME && member.sNo == row.S_NO
+        );
+    });
     console.log(`✅ Filtered ${otherPeople.length} people (excluding team members)`);
     
     // 3. 각 레코드마다 ALL_FIELDS 중 랜덤하게 3개씩 결측값 생성 (동적 계산: N명 * 3개)
