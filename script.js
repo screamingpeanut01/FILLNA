@@ -423,11 +423,11 @@ function createUserView() {
     const teamMemberNames = getTeamMemberNames(userTeam);
     console.log('📋 User team:', userTeam.teamName, 'Members:', teamMemberNames);
     
-    // 2. 본인 팀 제외한 54명 필터링
+    // 2. 본인 팀 제외한 나머지 참가자 필터링
     const otherPeople = fullData.filter(row => !teamMemberNames.includes(row.NAME));
     console.log(`✅ Filtered ${otherPeople.length} people (excluding team members)`);
     
-    // 3. 각 레코드마다 ALL_FIELDS 중 랜덤하게 3개씩 결측값 생성 (총 54 * 3 = 162개)
+    // 3. 각 레코드마다 ALL_FIELDS 중 랜덤하게 3개씩 결측값 생성 (동적 계산: N명 * 3개)
     const selectedMissing = [];
     
     otherPeople.forEach((row, rowIndex) => {

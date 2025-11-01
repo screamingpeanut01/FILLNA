@@ -4,128 +4,119 @@
       "teamNumber": 1,
       "teamName": "마케팅",
       "members": [
-        {"name": "장서현", "sNo": 2, "aNo": 2, "dept": null, "inData": false},
-        {"name": "권수연", "sNo": 4, "aNo": 4, "dept": "사회학과", "inData": true},
-        {"name": "민지원", "sNo": 4, "aNo": 4, "dept": "경영학과", "inData": true},
-        {"name": "김예린", "sNo": 5, "aNo": 5, "dept": "정치국제학과", "inData": true},
-        {"name": "김민서", "sNo": 6, "aNo": 6, "dept": "경영학과", "inData": true},
-        {"name": "김경모", "sNo": 6, "aNo": 6, "dept": "경영학과", "inData": true}
+        {"name": "장서현", "sNo": 2, "aNo": null, "dept": null},
+        {"name": "권수연", "sNo": 20, "aNo": 4, "dept": "사회학과"},
+        {"name": "민지원", "sNo": 21, "aNo": 4, "dept": "경영학과"},
+        {"name": "김예린", "sNo": 20, "aNo": 5, "dept": "정치국제학과"},
+        {"name": "김민서", "sNo": 23, "aNo": 6, "dept": "경영학과"},
+        {"name": "김경모", "sNo": 22, "aNo": 6, "dept": "경영학과"}
       ]
     },
     {
       "teamNumber": 2,
-      "teamName": "보험계리(5)",
+      "teamName": "HR/보험계리",
       "members": [
-        {"name": "이강민", "sNo": 0, "aNo": 0, "dept": "경영학과", "inData": true},
-        {"name": "왕용웅", "sNo": 3, "aNo": 3, "dept": "응용통계학과", "inData": true},
-        {"name": "조용호", "sNo": 4, "aNo": 4, "dept": "경영학과", "inData": true},
-        {"name": "김태연", "sNo": 5, "aNo": 5, "dept": "경영학과", "inData": true},
-        {"name": "최철원", "sNo": 6, "aNo": 6, "dept": "경영학과", "inData": true}
+        {"name": "이강민", "sNo": 19, "aNo": 0, "dept": "경영학과"},
+        {"name": "왕용웅", "sNo": 20, "aNo": 3, "dept": "응용통계학과"},
+        {"name": "조용호", "sNo": 20, "aNo": 4, "dept": "경영학과"},
+        {"name": "김태연", "sNo": 19, "aNo": 5, "dept": "경영학과"},
+        {"name": "최철원", "sNo": 23, "aNo": 6, "dept": "경영학과"}
       ]
     },
     {
       "teamNumber": 3,
       "teamName": "컨설팅",
       "members": [
-        {"name": "김태연", "sNo": 4, "aNo": 4, "dept": null, "inData": false},
-        {"name": "김채은", "sNo": 5, "aNo": 5, "dept": "산업보안학과", "inData": true},
-        {"name": "김현수", "sNo": 6, "aNo": 6, "dept": "물리학과", "inData": true},
-        {"name": "박서현", "sNo": 6, "aNo": 6, "dept": "경영학과", "inData": true},
-        {"name": "신혜성", "sNo": 6, "aNo": 6, "dept": "글로벌금융학과", "inData": true},
-        {"name": "한혜인", "sNo": 6, "aNo": 6, "dept": "중국어문학과", "inData": true}
+        {"name": "김태연", "sNo": 19, "aNo": 5, "dept": "경영학과"},
+        {"name": "김채은", "sNo": 23, "aNo": 5, "dept": "산업보안학과"},
+        {"name": "김현수", "sNo": 22, "aNo": 6, "dept": "물리학과"},
+        {"name": "박서현", "sNo": 23, "aNo": 6, "dept": "경영학과"},
+        {"name": "신혜성", "sNo": 25, "aNo": 6, "dept": "글로벌금융학과"},
+        {"name": "한혜인", "sNo": 23, "aNo": 6, "dept": "중국어문학과"}
       ]
     },
     {
       "teamNumber": 4,
-      "teamName": "재무 HR",
+      "teamName": "재무/회계",
       "members": [
-        {"name": "지민경", "sNo": 1, "aNo": 1, "dept": "응용통계학과", "inData": true},
-        {"name": "조일", "sNo": 3, "aNo": 3, "dept": "교육학과", "inData": true},
-        {"name": "강병익", "sNo": 4, "aNo": 4, "dept": "경영학과", "inData": true},
-        {"name": "문광윤", "sNo": 6, "aNo": 6, "dept": "중국어문학과", "inData": true},
-        {"name": "김채원", "sNo": 6, "aNo": 6, "dept": "정치국제학과", "inData": true},
-        {"name": "장희주", "sNo": 6, "aNo": 6, "dept": "경제학과", "inData": true}
+        {"name": "지민경", "sNo": 19, "aNo": 1, "dept": "응용통계학과"},
+        {"name": "조일", "sNo": 19, "aNo": 3, "dept": "교육학과"},
+        {"name": "강병익", "sNo": 22, "aNo": 4, "dept": "경영학과"},
+        {"name": "문광윤", "sNo": 22, "aNo": 6, "dept": "중국어문학과"},
+        {"name": "김채원", "sNo": 21, "aNo": 6, "dept": "정치국제학과"},
+        {"name": "장희주", "sNo": 24, "aNo": 6, "dept": "경제학과"}
       ]
     },
     {
       "teamNumber": 5,
-      "teamName": "서비스기획(5)",
+      "teamName": "서비스기획",
       "members": [
-        {"name": "김채원", "sNo": 3, "aNo": 3, "dept": "경영학과", "inData": true},
-        {"name": "이유정", "sNo": 3, "aNo": 3, "dept": null, "inData": false},
-        {"name": "김수린", "sNo": 4, "aNo": 4, "dept": null, "inData": false},
-        {"name": "김미정", "sNo": 5, "aNo": 5, "dept": "경영학과", "inData": true},
-        {"name": "곽주영", "sNo": 5, "aNo": 5, "dept": "응용통계학과", "inData": true},
-        {"name": "후영리", "sNo": 6, "aNo": 6, "dept": "경영학과", "inData": true}
+        {"name": "김채원", "sNo": 20, "aNo": 3, "dept": "경영학과"},
+        {"name": "이유정", "sNo": 3, "aNo": null, "dept": null},
+        {"name": "김수린", "sNo": 4, "aNo": null, "dept": null},
+        {"name": "김미정", "sNo": 20, "aNo": 5, "dept": "경영학과"},
+        {"name": "곽주영", "sNo": 22, "aNo": 5, "dept": "응용통계학과"}
       ]
     },
     {
       "teamNumber": 6,
       "teamName": "데이터분석 금융",
       "members": [
-        {"name": "문예준", "sNo": 1, "aNo": 1, "dept": "경영학과", "inData": true},
-        {"name": "장규석", "sNo": 3, "aNo": 3, "dept": "경영학과", "inData": true},
-        {"name": "이정연", "sNo": 4, "aNo": 4, "dept": "응용통계학과", "inData": true},
-        {"name": "박정우", "sNo": 6, "aNo": 6, "dept": "경영학과", "inData": true},
-        {"name": "신예운", "sNo": 6, "aNo": 6, "dept": "응용통계학과", "inData": true},
-        {"name": "전병욱", "sNo": 6, "aNo": 6, "dept": "응용통계학과", "inData": true}
+        {"name": "문예준", "sNo": 21, "aNo": 1, "dept": "경영학과"},
+        {"name": "장규석", "sNo": 18, "aNo": 3, "dept": "경영학과"},
+        {"name": "이정연", "sNo": 23, "aNo": 4, "dept": "응용통계학과"},
+        {"name": "박정우", "sNo": 21, "aNo": 6, "dept": "경영학과"},
+        {"name": "신예운", "sNo": 23, "aNo": 6, "dept": "응용통계학과"},
+        {"name": "전병욱", "sNo": 22, "aNo": 6, "dept": "응용통계학과"}
       ]
     },
     {
       "teamNumber": 7,
       "teamName": "데이터분석 IT",
       "members": [
-        {"name": "강영훈", "sNo": 0, "aNo": 0, "dept": "경영학과", "inData": true},
-        {"name": "송재호", "sNo": 2, "aNo": 2, "dept": null, "inData": false},
-        {"name": "이송아", "sNo": 3, "aNo": 3, "dept": "응용통계학과", "inData": true},
-        {"name": "김사라", "sNo": 4, "aNo": 4, "dept": "예술공학부", "inData": true},
-        {"name": "이승화", "sNo": 5, "aNo": 5, "dept": "소프트웨어학과", "inData": true},
-        {"name": "박진아", "sNo": 6, "aNo": 6, "dept": "응용통계학과", "inData": true}
+        {"name": "강영훈", "sNo": 17, "aNo": 0, "dept": "경영학과"},
+        {"name": "송재호", "sNo": 2, "aNo": null, "dept": null},
+        {"name": "이송아", "sNo": 21, "aNo": 3, "dept": "응용통계학과"},
+        {"name": "김사라", "sNo": 20, "aNo": 4, "dept": "예술공학부"},
+        {"name": "이승화", "sNo": 21, "aNo": 5, "dept": "소프트웨어학과"},
+        {"name": "박진아", "sNo": 22, "aNo": 6, "dept": "응용통계학과"}
       ]
     },
     {
       "teamNumber": 8,
       "teamName": "데이터분석 IT",
       "members": [
-        {"name": "서효정", "sNo": 0, "aNo": 0, "dept": null, "inData": false},
-        {"name": "정태성", "sNo": 2, "aNo": 2, "dept": "경영학과", "inData": true},
-        {"name": "황희영", "sNo": 2, "aNo": 2, "dept": "사회학과", "inData": true},
-        {"name": "이승재", "sNo": 4, "aNo": 4, "dept": "응용통계학과", "inData": true},
-        {"name": "김민준", "sNo": 5, "aNo": 5, "dept": "교육학과", "inData": true},
-        {"name": "장동혁", "sNo": 5, "aNo": 5, "dept": "영어영문학과", "inData": true}
+        {"name": "서효정", "sNo": 0, "aNo": null, "dept": null},
+        {"name": "정태성", "sNo": 20, "aNo": 2, "dept": "경영학과"},
+        {"name": "황희영", "sNo": 22, "aNo": 2, "dept": "사회학과"},
+        {"name": "이승재", "sNo": 20, "aNo": 4, "dept": "응용통계학과"},
+        {"name": "김민준", "sNo": 19, "aNo": 5, "dept": "교육학과"},
+        {"name": "장동혁", "sNo": 20, "aNo": 5, "dept": "영어영문학과"}
       ]
     },
     {
       "teamNumber": 9,
       "teamName": "데이터분석 SCM",
       "members": [
-        {"name": "김다솔", "sNo": 0, "aNo": 0, "dept": "경영학과", "inData": true},
-        {"name": "김근아", "sNo": 1, "aNo": 1, "dept": "국제물류학과", "inData": true},
-        {"name": "김재환", "sNo": 3, "aNo": 3, "dept": "응용통계학과", "inData": true},
-        {"name": "김선교", "sNo": 4, "aNo": 4, "dept": null, "inData": false},
-        {"name": "강경희", "sNo": 4, "aNo": 4, "dept": "응용통계학과", "inData": true},
-        {"name": "함규영", "sNo": 6, "aNo": 6, "dept": "도시계획부동산학과", "inData": true}
+        {"name": "김다솔", "sNo": 18, "aNo": 0, "dept": "경영학과"},
+        {"name": "김근아", "sNo": 20, "aNo": 1, "dept": "국제물류학과"},
+        {"name": "김재환", "sNo": 20, "aNo": 3, "dept": "응용통계학과"},
+        {"name": "김선교", "sNo": 4, "aNo": null, "dept": null},
+        {"name": "강경희", "sNo": 23, "aNo": 4, "dept": "응용통계학과"},
+        {"name": "함규영", "sNo": 23, "aNo": 6, "dept": "도시계획부동산학과"}
       ]
     },
     {
       "teamNumber": 10,
       "teamName": "진학팀",
       "members": [
-        {"name": "박지수", "sNo": 0, "aNo": 0, "dept": "수학과", "inData": true},
-        {"name": "강태영", "sNo": 3, "aNo": 3, "dept": "응용통계학과", "inData": true},
-        {"name": "정호준", "sNo": 4, "aNo": 4, "dept": "응용통계학과", "inData": true},
-        {"name": "장선희", "sNo": 4, "aNo": 4, "dept": "중국어문학과", "inData": true},
-        {"name": "이지민", "sNo": 5, "aNo": 5, "dept": "경영학과", "inData": true},
-        {"name": "이예령", "sNo": 6, "aNo": 6, "dept": "응용통계학과", "inData": true}
+        {"name": "박지수", "sNo": 17, "aNo": 0, "dept": "수학과"},
+        {"name": "강태영", "sNo": 20, "aNo": 3, "dept": "응용통계학과"},
+        {"name": "정호준", "sNo": 21, "aNo": 4, "dept": "응용통계학과"},
+        {"name": "장선희", "sNo": 20, "aNo": 4, "dept": "중국어문학과"},
+        {"name": "이지민", "sNo": 22, "aNo": 5, "dept": "경영학과"},
+        {"name": "이예령", "sNo": 22, "aNo": 6, "dept": "응용통계학과"}
       ]
     }
-  ],
-  "metadata": {
-    "totalTeams": 10,
-    "totalMembers": 59,
-    "membersInData": 52,
-    "membersNotInData": 7,
-    "notInDataList": ["장서현", "김태연(4기)", "이유정", "김수린", "송재호", "서효정", "김선교"],
-    "notes": "inData=false인 멤버는 설문 미참여자로 data.csv에 없지만 게임 참여 가능"
-  }
+  ]
 }
